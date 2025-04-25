@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Image Processing Config</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #ccc;
+            --control-bg: #f9f9f9;
+            --button-bg: #4CAF50;
+            --button-hover: #45a049;
+            --input-bg: #ffffff;
+            --input-border: #ddd;
+            --pre-bg: #ffffff;
+            --pre-border: #eee;
+        }
+
+        .dark-theme {
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #444;
+            --control-bg: #2d2d2d;
+            --button-bg: #388E3C;
+            --button-hover: #2E7D32;
+            --input-bg: #333;
+            --input-border: #555;
+            --pre-bg: #252525;
+            --pre-border: #444;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .images,
+        .controls {
+            width: 100%;
+        }
+
+        .image-container {
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            background-color: var(--control-bg);
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--control-bg);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .value-display {
+            font-size: 0.8em;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        button {
+            padding: 8px 12px;
+            background-color: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+        }
+
+        .no-image {
+            color: var(--text-color);
+            opacity: 0.7;
+            font-style: italic;
+            padding: 30px 0;
+            text-align: center;
+            border: 2px dashed var(--border-color);
+            font-size: 0.9em;
+        }
+
+        .text-results {
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--control-bg);
+        }
+
+        .text-results pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: var(--pre-bg);
+            padding: 8px;
+            border: 1px solid var(--pre-border);
+            border-radius: 3px;
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+
+        #text-results-container {
+            margin-top: 8px;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--control-bg);
+            display: none;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .theme-switcher {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+
+        .theme-btn {
+            padding: 5px 10px;
+            background-color: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="theme-switcher">
+        <button id="theme-toggle" class="theme-btn">Toggle Dark Mode</button>
+    </div>
+
+    <h1>Image Processing Configuration: {{pid}}</h1>
+
+    <div class="container">
+        <div class="images">
+            <div class="image-container">
+                <h3>Original Image</h3>
+                {% if origin_exists %}
+                <img id="original-img" src="/image/{{ pid }}/original?{{ timestamp }}" alt="Original">
+                {% else %}
+                <div class="no-image">No image uploaded yet (will appear after first translation)</div>
+                {% endif %}
+            </div>
+            <div class="image-container">
+                <h3>Processed Image</h3>
+                {% if origin_exists %}
+                <img id="processed-img" src="/image/{{ pid }}/processed?{{ timestamp }}" alt="Processed">
+                {% else %}
+                <div class="no-image">Processed image will appear here</div>
+                {% endif %}
+            </div>
+            <div>
+                <button id="process-btn">Update Processing</button>
+                <span id="status-message"></span>
+            </div>
+
+            <div class="text-results">
+                <h3>Text Recognition Results</h3>
+                <button id="recognize-btn">Recognize Text</button>
+                <div id="text-results-container">
+                    <h4>Original Text:</h4>
+                    <pre id="original-text"></pre>
+                    <h4>Translated Text:</h4>
+                    <pre id="translated-text"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h2>Image Processing Settings</h2>
+
+            <div class="control-group">
+                <h3>Basic Adjustments</h3>
+
+                <label for="contrast">Contrast (0-2)</label>
+                <input type="number" id="contrast" min="0" max="2" step="0.1"
+                    value="{{ config.image_processing.contrast }}">
+
+                <label for="brightness">Brightness (0-2)</label>
+                <input type="number" id="brightness" min="0" max="2" step="0.1"
+                    value="{{ config.image_processing.brightness }}">
+
+                <label for="sharpness">Sharpness (0-2)</label>
+                <input type="number" id="sharpness" min="0" max="2" step="0.1"
+                    value="{{ config.image_processing.sharpness }}">
+            </div>
+
+            <div class="control-group">
+                <h3>Advanced Processing</h3>
+
+                <label for="threshold">Threshold (-1 to 255)</label>
+                <input type="number" id="threshold" min="-1" max="255" step="1"
+                    value="{{ config.image_processing.threshold }}">
+
+                <label for="blur">Blur Radius (0-5)</label>
+                <input type="number" id="blur" min="0" max="5" step="0.1"
+                    value="{{ config.image_processing.blur_radius }}">
+
+                <label>
+                    <input type="checkbox" id="invert" {% if config.image_processing.invert %}checked{% endif %}>
+                    Invert Colors
+                </label>
+            </div>
+
+            <div class="control-group">
+                <h3>OCR Settings</h3>
+
+                <label for="ocr-lang">OCR Language</label>
+                <select id="ocr-lang">
+                    <option value="en" {% if config.paddleocr.lang=='en' %}selected{% endif %}>English</option>
+                    <option value="fr" {% if config.paddleocr.lang=='fr' %}selected{% endif %}>French</option>
+                    <option value="de" {% if config.paddleocr.lang=='de' %}selected{% endif %}>German</option>
+                    <option value="ja" {% if config.paddleocr.lang=='ja' %}selected{% endif %}>Japanese</option>
+                    <option value="ko" {% if config.paddleocr.lang=='ko' %}selected{% endif %}>Korean</option>
+                    <option value="ru" {% if config.paddleocr.lang=='ru' %}selected{% endif %}>Russian</option>
+                    <option value="zh" {% if config.paddleocr.lang=='zh' %}selected{% endif %}>Chinese</option>
+                    <option value="uk" {% if config.paddleocr.lang=='uk' %}selected{% endif %}>Ukrainian</option>
+                </select>
+
+                <label>
+                    <input type="checkbox" id="use-angle-cls" {% if config.paddleocr.use_angle_cls %}checked{% endif %}>
+                    Use Angle Classification
+                </label>
+
+                <label for="rec-algorithm">Recognition Algorithm</label>
+                <select id="rec-algorithm">
+                    <option value="CRNN" {% if config.paddleocr.rec_algorithm=='CRNN' %}selected{% endif %}>CRNN
+                    </option>
+                    <option value="SVTR_LCNet" {% if config.paddleocr.rec_algorithm=='SVTR_LCNet' %}selected{% endif %}>
+                        SVTR_LCNet</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <h3>Translation Settings</h3>
+
+                <label for="src-lang">Source Language</label>
+                <select id="src-lang">
+                    <option value="eng_Latn" {% if config.translation.src_lang=='eng_Latn' %}selected{% endif %}>English
+                    </option>
+                    <option value="fra_Latn" {% if config.translation.src_lang=='fra_Latn' %}selected{% endif %}>French
+                    </option>
+                    <option value="deu_Latn" {% if config.translation.src_lang=='deu_Latn' %}selected{% endif %}>German
+                    </option>
+                    <option value="jpn_Jpan" {% if config.translation.src_lang=='jpn_Jpan' %}selected{% endif %}>
+                        Japanese</option>
+                    <option value="kor_Hang" {% if config.translation.src_lang=='kor_Hang' %}selected{% endif %}>Korean
+                    </option>
+                    <option value="rus_Cyrl" {% if config.translation.src_lang=='rus_Cyrl' %}selected{% endif %}>Russian
+                    </option>
+                    <option value="zho_Hans" {% if config.translation.src_lang=='zho_Hans' %}selected{% endif %}>Chinese
+                    </option>
+                    <option value="ukr_Cyrl" {% if config.translation.src_lang=='ukr_Cyrl' %}selected{% endif %}>
+                        Ukrainian</option>
+                </select>
+
+                <label for="dest-lang">Target Language</label>
+                <select id="dest-lang">
+                    <option value="eng_Latn" {% if config.translation.dest_lang=='eng_Latn' %}selected{% endif %}>
+                        English</option>
+                    <option value="fra_Latn" {% if config.translation.dest_lang=='fra_Latn' %}selected{% endif %}>French
+                    </option>
+                    <option value="deu_Latn" {% if config.translation.dest_lang=='deu_Latn' %}selected{% endif %}>German
+                    </option>
+                    <option value="rus_Cyrl" {% if config.translation.dest_lang=='rus_Cyrl' %}selected{% endif %}>
+                        Russian</option>
+                    <option value="ukr_Cyrl" {% if config.translation.dest_lang=='ukr_Cyrl' %}selected{% endif %}>
+                        Ukrainian</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <h3>Text Processing</h3>
+
+                <label>
+                    <input type="checkbox" id="enable-lm-correction" {% if config.text_processing.enable_lm_correction
+                        %}checked{% endif %}>
+                    Enable Language Model Correction
+                </label>
+
+                <label>
+                    <input type="checkbox" id="enable-symspellpy" {% if config.text_processing.enable_symspellpy
+                        %}checked{% endif %}>
+                    Enable symspellpy
+                </label>
+
+                <label>
+                    <input type="checkbox" id="split-sentences" {% if config.text_processing.split_sentences %}checked{%
+                        endif %}>
+                    Split Text into Sentences for Translation
+                </label>
+            </div>
+
+            <button id="save-btn">Save Settings</button>
+            <button id="reset-btn">Reset to Defaults</button>
+        </div>
+    </div>
+
+    <script>
+        const pid = "{{ pid }}";
+
+        const themeToggle = document.getElementById('theme-toggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        const currentTheme = localStorage.getItem('theme') || 
+                           (prefersDarkScheme.matches ? 'dark' : 'light');
+        
+        if (currentTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeToggle.textContent = 'Toggle Light Mode';
+        } else {
+            themeToggle.textContent = 'Toggle Dark Mode';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            if (document.body.classList.contains('dark-theme')) {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('theme', 'light');
+                themeToggle.textContent = 'Toggle Dark Mode';
+            } else {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.textContent = 'Toggle Light Mode';
+            }
+        });
+
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            const valueDisplay = document.getElementById(`${input.id}-value`);
+            input.addEventListener('input', () => {
+                if (valueDisplay) {
+                    valueDisplay.textContent = input.value;
+                }
+            });
+        });
+
+        document.getElementById('process-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('process-btn');
+            const statusMsg = document.getElementById('status-message');
+
+            btn.disabled = true;
+            statusMsg.textContent = "Processing...";
+            statusMsg.style.color = "#333";
+
+            try {
+                const response = await fetch(`/process_image/${pid}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    const timestamp = new Date().getTime();
+                    document.getElementById('original-img').src = `/image/${pid}/original?${timestamp}`;
+                    document.getElementById('processed-img').src = `/image/${pid}/processed?${timestamp}`;
+                    statusMsg.textContent = "Processing updated!";
+                    statusMsg.style.color = "green";
+                } else {
+                    statusMsg.textContent = "Error: " + (data.error || 'Unknown error');
+                    statusMsg.style.color = "red";
+                }
+            } catch (error) {
+                statusMsg.textContent = "Error: " + error.message;
+                statusMsg.style.color = "red";
+            } finally {
+                btn.disabled = false;
+                setTimeout(() => statusMsg.textContent = "", 3000);
+            }
+        });
+
+        document.getElementById('recognize-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('recognize-btn');
+            const resultsContainer = document.getElementById('text-results-container');
+            const originalText = document.getElementById('original-text');
+            const translatedText = document.getElementById('translated-text');
+
+            btn.disabled = true;
+            resultsContainer.style.display = 'none';
+
+            try {
+                const response = await fetch(`/recognize_text/${pid}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    originalText.textContent = data.recognized_text || "No text recognized";
+                    translatedText.textContent = data.translated_text || "No translation available";
+                    resultsContainer.style.display = 'block';
+                } else {
+                    const error = await response.json();
+                    alert("Error: " + (error.error || 'Failed to recognize text'));
+                }
+            } catch (error) {
+                alert("Error: " + error.message);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('save-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('save-btn');
+            const statusMsg = document.getElementById('status-message');
+
+            btn.disabled = true;
+            statusMsg.textContent = "Saving...";
+            statusMsg.style.color = "#333";
+
+            const settings = {
+                image_processing: {
+                    contrast: parseFloat(document.getElementById('contrast').value),
+                    brightness: parseFloat(document.getElementById('brightness').value),
+                    sharpness: parseFloat(document.getElementById('sharpness').value),
+                    threshold: parseInt(document.getElementById('threshold').value),
+                    blur_radius: parseFloat(document.getElementById('blur').value),
+                    invert: document.getElementById('invert').checked
+                },
+                paddleocr: {
+                    lang: document.getElementById('ocr-lang').value,
+                    use_angle_cls: document.getElementById('use-angle-cls').checked,
+                    rec_algorithm: document.getElementById('rec-algorithm').value
+                },
+                translation: {
+                    src_lang: document.getElementById('src-lang').value,
+                    dest_lang: document.getElementById('dest-lang').value
+                },
+                text_processing: {
+                    enable_lm_correction: document.getElementById('enable-lm-correction').checked,
+                    enable_symspellpy: document.getElementById('enable-symspellpy').checked,
+                    split_sentences: document.getElementById('split-sentences').checked
+                }
+            };
+
+            try {
+                const response = await fetch(`/save_config/${pid}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                if (response.ok) {
+                    statusMsg.textContent = "Settings saved and applied!";
+                    statusMsg.style.color = "green";
+                    document.getElementById('process-btn').click();
+                } else {
+                    const data = await response.json();
+                    statusMsg.textContent = "Error: " + (data.message || 'Failed to save settings');
+                    statusMsg.style.color = "red";
+                }
+            } catch (error) {
+                statusMsg.textContent = "Error: " + error.message;
+                statusMsg.style.color = "red";
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset all settings to defaults?')) {
+                document.getElementById('contrast').value = 1.0;
+                document.getElementById('brightness').value = 1.0;
+                document.getElementById('sharpness').value = 1.0;
+                document.getElementById('threshold').value = -1;
+                document.getElementById('blur').value = 0;
+                document.getElementById('invert').checked = false;
+                document.getElementById('ocr-lang').value = 'en';
+                document.getElementById('use-angle-cls').checked = true;
+                document.getElementById('rec-algorithm').value = 'CRNN';
+                document.getElementById('src-lang').value = 'eng_Latn';
+                document.getElementById('dest-lang').value = 'rus_Cyrl';
+                document.getElementById('enable-lm-correction').checked = false;
+                document.getElementById('enable-symspellpy').checked = false;
+                document.getElementById('split-sentences').checked = true;
+                document.getElementById('save-btn').click();
+            }
+        });
+    </script>
+</body>
+
+</html>
