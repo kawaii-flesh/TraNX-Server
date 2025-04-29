@@ -17,6 +17,7 @@ app = Flask(__name__)
 
 SAVE_DIR = "./data"
 DEFAULT_CONFIG = {
+    "version": "2.0.0",
     "image_processing": {
         "contrast": 1.0,
         "brightness": 1.0,
@@ -94,6 +95,16 @@ def load_config():
     if os.path.exists(config_path):
         with open(config_path, 'r') as f:
             config = json.load(f)
+            current_major_version = config.get("version", "1.0.0").split('.')[0]
+            default_major_version = DEFAULT_CONFIG["version"].split('.')[0]
+            
+            if current_major_version != default_major_version:
+                new_path = f"{config_path}.v{config.get('version', '1.0.0')}"
+                os.rename(config_path, new_path)
+                config = DEFAULT_CONFIG.copy()
+                with open(config_path, 'w') as new_f:
+                    json.dump(config, new_f, indent=4)
+            
             load_models_from_config(config)
             return config
     else:
