@@ -10,7 +10,19 @@ TraNX-Server - OCR + перевод для экранного переводчи
 
 Если вы обладаете большей памятью, то поробуйте [facebook/nllb-200-3.3B](https://huggingface.co/facebook/nllb-200-3.3B)
 
-### Windows + Nvidia
+### Windows + Google Translate
+
+```powershell
+python -m venv tranx-venv
+tranx-venv\Scripts\activate
+pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
+pip install paddleocr==2.10.0
+pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
+pip install googletrans==4.0.0-rc1
+python server.py --translator google
+```
+
+### Windows + NLLB + Nvidia
 
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 - [CUDA 11.8](https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_522.06_windows.exe)
@@ -25,10 +37,10 @@ pip install transformers==4.51.3
 pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
 pip install paddleocr==2.10.0
 pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
-python server.py
+python server.py --translator nllb
 ```
 
-### Windows + CPU
+### Windows + NLLB + CPU
 
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 
@@ -41,7 +53,7 @@ pip install transformers==4.51.3
 pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
 pip install paddleocr==2.10.0
 pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
-python server.py
+python server.py --translator nllb
 ```
 
 ## Использование веб-конфигуратора

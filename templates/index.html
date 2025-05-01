@@ -291,50 +291,31 @@
 
             <div class="control-group">
                 <h3>Translation Settings</h3>
-
+            
                 <label for="src-lang">Source Language</label>
                 <select id="src-lang">
-                    <option value="eng_Latn" {% if config.translation.src_lang=='eng_Latn' %}selected{% endif %}>English
-                    </option>
-                    <option value="fra_Latn" {% if config.translation.src_lang=='fra_Latn' %}selected{% endif %}>French
-                    </option>
-                    <option value="deu_Latn" {% if config.translation.src_lang=='deu_Latn' %}selected{% endif %}>German
-                    </option>
-                    <option value="jpn_Jpan" {% if config.translation.src_lang=='jpn_Jpan' %}selected{% endif %}>
-                        Japanese</option>
-                    <option value="kor_Hang" {% if config.translation.src_lang=='kor_Hang' %}selected{% endif %}>Korean
-                    </option>
-                    <option value="rus_Cyrl" {% if config.translation.src_lang=='rus_Cyrl' %}selected{% endif %}>Russian
-                    </option>
-                    <option value="zho_Hans" {% if config.translation.src_lang=='zho_Hans' %}selected{% endif %}>Chinese
-                    </option>
-                    <option value="ukr_Cyrl" {% if config.translation.src_lang=='ukr_Cyrl' %}selected{% endif %}>
-                        Ukrainian</option>
+                    <option value="eng" {% if config.translation.src_lang=='eng' %}selected{% endif %}>English</option>
+                    <option value="fra" {% if config.translation.src_lang=='fra' %}selected{% endif %}>French</option>
+                    <option value="deu" {% if config.translation.src_lang=='deu' %}selected{% endif %}>German</option>
+                    <option value="jpn" {% if config.translation.src_lang=='jpn' %}selected{% endif %}>Japanese</option>
+                    <option value="kor" {% if config.translation.src_lang=='kor' %}selected{% endif %}>Korean</option>
+                    <option value="rus" {% if config.translation.src_lang=='rus' %}selected{% endif %}>Russian</option>
+                    <option value="zho" {% if config.translation.src_lang=='zho' %}selected{% endif %}>Chinese</option>
+                    <option value="ukr" {% if config.translation.src_lang=='ukr' %}selected{% endif %}>Ukrainian</option>
                 </select>
-
+            
                 <label for="dest-lang">Target Language</label>
                 <select id="dest-lang">
-                    <option value="eng_Latn" {% if config.translation.dest_lang=='eng_Latn' %}selected{% endif %}>
-                        English</option>
-                    <option value="fra_Latn" {% if config.translation.dest_lang=='fra_Latn' %}selected{% endif %}>French
-                    </option>
-                    <option value="deu_Latn" {% if config.translation.dest_lang=='deu_Latn' %}selected{% endif %}>German
-                    </option>
-                    <option value="rus_Cyrl" {% if config.translation.dest_lang=='rus_Cyrl' %}selected{% endif %}>
-                        Russian</option>
-                    <option value="ukr_Cyrl" {% if config.translation.dest_lang=='ukr_Cyrl' %}selected{% endif %}>
-                        Ukrainian</option>
+                    <option value="eng" {% if config.translation.dest_lang=='eng' %}selected{% endif %}>English</option>
+                    <option value="fra" {% if config.translation.dest_lang=='fra' %}selected{% endif %}>French</option>
+                    <option value="deu" {% if config.translation.dest_lang=='deu' %}selected{% endif %}>German</option>
+                    <option value="rus" {% if config.translation.dest_lang=='rus' %}selected{% endif %}>Russian</option>
+                    <option value="ukr" {% if config.translation.dest_lang=='ukr' %}selected{% endif %}>Ukrainian</option>
                 </select>
             </div>
 
             <div class="control-group">
                 <h3>Text Processing</h3>
-
-                <label>
-                    <input type="checkbox" id="enable-lm-correction" {% if config.text_processing.enable_lm_correction
-                        %}checked{% endif %}>
-                    Enable Language Model Correction
-                </label>
 
                 <label>
                     <input type="checkbox" id="enable-symspellpy" {% if config.text_processing.enable_symspellpy
@@ -481,7 +462,6 @@
                     dest_lang: document.getElementById('dest-lang').value
                 },
                 text_processing: {
-                    enable_lm_correction: document.getElementById('enable-lm-correction').checked,
                     enable_symspellpy: document.getElementById('enable-symspellpy').checked,
                     split_sentences: document.getElementById('split-sentences').checked
                 }
@@ -526,7 +506,6 @@
                 document.getElementById('rec-algorithm').value = 'CRNN';
                 document.getElementById('src-lang').value = 'eng_Latn';
                 document.getElementById('dest-lang').value = 'rus_Cyrl';
-                document.getElementById('enable-lm-correction').checked = false;
                 document.getElementById('enable-symspellpy').checked = false;
                 document.getElementById('split-sentences').checked = true;
                 document.getElementById('save-btn').click();
