@@ -4,13 +4,9 @@ TraNX-Server - OCR + перевод для экранного переводчи
 
 ## Устновка и запуск
 
-Тестировалось с NVIDIA GeForce RTX 4060 Ti (8188MiB)
-
-Если у вас недостаточно памяти для разворачивания модели [facebook/nllb-200-1.3B](https://huggingface.co/facebook/nllb-200-1.3B), то попробуйте [facebook/nllb-200-distilled-600M](https://huggingface.co/facebook/nllb-200-distilled-600M) указав ее в [server.py](https://github.com/kawaii-flesh/TraNX-Server/blob/main/server.py) -> `TRANSLATION_MODEL`
-
-Если вы обладаете большей памятью, то поробуйте [facebook/nllb-200-3.3B](https://huggingface.co/facebook/nllb-200-3.3B)
-
 ### Windows + Google Translate
+
+- [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 
 ```powershell
 python -m venv tranx-venv
@@ -23,6 +19,12 @@ python server.py --translator google
 ```
 
 ### Windows + NLLB + Nvidia
+
+Тестировалось с NVIDIA GeForce RTX 4060 Ti (8188MiB)
+
+Если у вас недостаточно памяти для разворачивания модели [facebook/nllb-200-1.3B](https://huggingface.co/facebook/nllb-200-1.3B), то попробуйте [facebook/nllb-200-distilled-600M](https://huggingface.co/facebook/nllb-200-distilled-600M) указав ее в [tnx_translator/nllb_translator.py](https://github.com/kawaii-flesh/TraNX-Server/blob/main/tnx_translator/nllb_translator.py) -> `model_name`
+
+Если вы обладаете большей памятью, то поробуйте [facebook/nllb-200-3.3B](https://huggingface.co/facebook/nllb-200-3.3B)
 
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 - [CUDA 11.8](https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_522.06_windows.exe)
