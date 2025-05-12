@@ -17,7 +17,7 @@ from tnx_translator import Translator, get_translator
 LANGUAGE_CODES = ['eng', 'rus', 'ukr', 'deu', 'fra', 'jpn', 'kor', 'zho']
 SAVE_DIR = "./data"
 DEFAULT_CONFIG = {
-    "version": "2.0.0",
+    "version": "2.0.1",
     "image_processing": {
         "contrast": 1.0,
         "brightness": 1.0,
