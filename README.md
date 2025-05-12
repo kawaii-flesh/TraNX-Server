@@ -45,13 +45,6 @@ python server.py --translator google
       ```powershell
       python server.py --translator baidu
       ```
-      Alternatively, you can set the environment variable `TRANSLATOR_TYPE=baidu` before running `server.py`.
-
-- **Language Codes**:
-  The `baidu_translator.py` file contains a `BAIDU_LANG_MAP` which maps common language codes (e.g., 'eng', 'zho') to Baidu-specific codes (e.g., 'en', 'zh'). Refer to this map or the official Baidu Translate API documentation for a full list of supported language codes if you need to translate other languages.
-
-```
-
 ### Windows + NLLB + Nvidia
 
 Тестировалось с NVIDIA GeForce RTX 4060 Ti (8188MiB)

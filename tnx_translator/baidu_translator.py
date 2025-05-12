@@ -53,8 +53,8 @@ class BaiduTranslator(Translator):
             headers = {'Content-Type': 'application/x-www-form-urlencoded'}
             payload = {
                 'q': sentence,
-                'from': self.BAIDU_LANG_MAP.get(src_lang, 'auto'), # Use 'auto' if src_lang not in map
-                'to': self.BAIDU_LANG_MAP.get(dest_lang, dest_lang),
+                'from': src_lang,
+                'to': dest_lang,
                 'appid': self.app_id,
                 'salt': salt,
                 'sign': sign
