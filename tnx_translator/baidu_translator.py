@@ -14,8 +14,7 @@ class BaiduTranslator(Translator):
         'kor': 'kor',
         'rus': 'ru',
         'zho': 'zh',
-        'ukr': 'ukr'  # Baidu might use 'uk' for Ukrainian, needs verification
-        # Add other languages as needed, check Baidu's documentation for exact codes
+        'ukr': 'ukr'
     }
 
     def __init__(self, app_id: str = None, app_key: str = None):
