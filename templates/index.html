@@ -291,7 +291,7 @@
 
             <div class="control-group">
                 <h3>Translation Settings</h3>
-            
+
                 <label for="src-lang">Source Language</label>
                 <select id="src-lang">
                     <option value="eng" {% if config.translation.src_lang=='eng' %}selected{% endif %}>English</option>
@@ -301,16 +301,22 @@
                     <option value="kor" {% if config.translation.src_lang=='kor' %}selected{% endif %}>Korean</option>
                     <option value="rus" {% if config.translation.src_lang=='rus' %}selected{% endif %}>Russian</option>
                     <option value="zho" {% if config.translation.src_lang=='zho' %}selected{% endif %}>Chinese</option>
-                    <option value="ukr" {% if config.translation.src_lang=='ukr' %}selected{% endif %}>Ukrainian</option>
+                    <option value="ukr" {% if config.translation.src_lang=='ukr' %}selected{% endif %}>Ukrainian
+                    </option>
                 </select>
-            
+
                 <label for="dest-lang">Target Language</label>
                 <select id="dest-lang">
                     <option value="eng" {% if config.translation.dest_lang=='eng' %}selected{% endif %}>English</option>
                     <option value="fra" {% if config.translation.dest_lang=='fra' %}selected{% endif %}>French</option>
                     <option value="deu" {% if config.translation.dest_lang=='deu' %}selected{% endif %}>German</option>
+                    <option value="jpn" {% if config.translation.dest_lang=='jpn' %}selected{% endif %}>Japanese
+                    </option>
+                    <option value="kor" {% if config.translation.dest_lang=='kor' %}selected{% endif %}>Korean</option>
                     <option value="rus" {% if config.translation.dest_lang=='rus' %}selected{% endif %}>Russian</option>
-                    <option value="ukr" {% if config.translation.dest_lang=='ukr' %}selected{% endif %}>Ukrainian</option>
+                    <option value="zho" {% if config.translation.dest_lang=='zho' %}selected{% endif %}>Chinese</option>
+                    <option value="ukr" {% if config.translation.dest_lang=='ukr' %}selected{% endif %}>Ukrainian
+                    </option>
                 </select>
             </div>
 
@@ -340,17 +346,17 @@
 
         const themeToggle = document.getElementById('theme-toggle');
         const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-        
-        const currentTheme = localStorage.getItem('theme') || 
-                           (prefersDarkScheme.matches ? 'dark' : 'light');
-        
+
+        const currentTheme = localStorage.getItem('theme') ||
+            (prefersDarkScheme.matches ? 'dark' : 'light');
+
         if (currentTheme === 'dark') {
             document.body.classList.add('dark-theme');
             themeToggle.textContent = 'Toggle Light Mode';
         } else {
             themeToggle.textContent = 'Toggle Dark Mode';
         }
-        
+
         themeToggle.addEventListener('click', () => {
             if (document.body.classList.contains('dark-theme')) {
                 document.body.classList.remove('dark-theme');
@@ -510,6 +516,23 @@
                 document.getElementById('split-sentences').checked = true;
                 document.getElementById('save-btn').click();
             }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('save-btn').click();
+            }
+        });
+
+        const inputFields = document.querySelectorAll('input, select');
+        inputFields.forEach(field => {
+            field.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    document.getElementById('save-btn').click();
+                }
+            });
         });
     </script>
 </body>

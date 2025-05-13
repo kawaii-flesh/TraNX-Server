@@ -17,7 +17,7 @@ from tnx_translator import Translator, get_translator
 LANGUAGE_CODES = ['eng', 'rus', 'ukr', 'deu', 'fra', 'jpn', 'kor', 'zho']
 SAVE_DIR = "./data"
 DEFAULT_CONFIG = {
-    "version": "2.0.1",
+    "version": "2.1.0",
     "image_processing": {
         "contrast": 1.0,
         "brightness": 1.0,
@@ -305,11 +305,12 @@ def upload_screenshot():
 
         frame_width = render_end_x - render_x
         frame_height = render_end_y - render_y
-        char_width_to_height = 0.6
         font_height = frame_height
+        aspect_ratio = helpers.get_aspect_ratio(translated_text)
 
         while True:
-            max_chars_per_line = int(frame_width / (font_height * char_width_to_height))
+            char_width = font_height * aspect_ratio
+            max_chars_per_line = int(frame_width / char_width)
             wrapped_text = helpers.wrap_text(translated_text, max_chars_per_line)
             lines_count = len(wrapped_text.split('\n'))
             total_height = lines_count * font_height
@@ -331,7 +332,7 @@ def upload_screenshot():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run OCR translation server.")
-    parser.add_argument("--translator", type=str, choices=["nllb", "google"])
+    parser.add_argument("--translator", type=str, choices=["nllb", "google", "baidu"])
     args = parser.parse_args()
 
     translator = get_translator(args.translator)
