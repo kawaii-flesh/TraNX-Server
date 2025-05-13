@@ -18,6 +18,33 @@ pip install googletrans==4.0.0-rc1
 python server.py --translator google
 ```
 
+### Windows + Baidu Translate
+
+- **Requirements**:
+  - Python (if not already installed from other setups).
+  - Baidu Translate API App ID and App Key.
+
+- **Setup**:
+  1.  **Get Baidu API Credentials**:
+      Obtain an `APP_ID` and `APP_KEY` from the [Baidu Translate API Console](https://fanyi-api.baidu.com/manage/developer).
+
+  2.  **Set Environment Variables**:
+      You **MUST** set the following environment variables with your Baidu API credentials:
+      - `BAIDU_TRANSLATOR_APP_ID="YOUR_APP_ID"`
+      - `BAIDU_TRANSLATOR_APP_KEY="YOUR_APP_KEY"`
+      Replace `"YOUR_APP_ID"` and `"YOUR_APP_KEY"` with your actual credentials.
+
+  3.  **Install Dependencies (if needed)**:
+      The `requests` library is required for Baidu Translate. It's likely already installed if you followed other setup instructions (e.g., for Google Translate or NLLB). If not, install it:
+      ```powershell
+      pip install requests
+      ```
+      (Other dependencies like `paddleocr`, `flask`, etc., are assumed to be installed as per other sections.)
+
+  4.  **Run the Server with Baidu Translator**:
+      ```powershell
+      python server.py --translator baidu
+      ```
 ### Windows + NLLB + Nvidia
 
 Тестировалось с NVIDIA GeForce RTX 4060 Ti (8188MiB)
