@@ -41,6 +41,76 @@ pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==
 python server.py --translator baidu
 ```
 
+### Windows + Aliyun Translate
+
+- [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
+
+- **Setup**:
+  1.  **Get Aliyun API Credentials**:
+      Obtain an `ACCESS_KEY_ID` and `ACCESS_KEY_SECRET` from the [Aliyun RAM Console](https://ram.console.aliyun.com/).
+
+  2.  **Set Environment Variables**:
+      You **MUST** set the following environment variables with your Aliyun API credentials:
+      - `ALIYUN_TRANSLATOR_ACCESS_KEY_ID="YOUR_ACCESS_KEY_ID"`
+      - `ALIYUN_TRANSLATOR_ACCESS_KEY_SECRET="YOUR_ACCESS_KEY_SECRET"`
+      Replace `"YOUR_ACCESS_KEY_ID"` and `"YOUR_ACCESS_KEY_SECRET"` with your actual credentials.
+
+```powershell
+python -m venv tranx-venv
+tranx-venv\Scripts\activate
+pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
+pip install paddleocr==2.10.0
+pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
+pip install alibabacloud-alimt20181012==1.5.0
+python server.py --translator aliyun
+```
+
+### Windows + Tencent Translate
+
+- [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
+
+- **Setup**:
+  1.  **Get Tencent API Credentials**:
+      Obtain a `SECRET_ID` and `SECRET_KEY` from the [Tencent Cloud Console](https://console.cloud.tencent.com/cam/capi).
+
+  2.  **Set Environment Variables**:
+      You **MUST** set the following environment variables with your Tencent API credentials:
+      - `TENCENT_TRANSLATOR_SECRET_ID="YOUR_SECRET_ID"`
+      - `TENCENT_TRANSLATOR_SECRET_KEY="YOUR_SECRET_KEY"`
+      Replace `"YOUR_SECRET_ID"` and `"YOUR_SECRET_KEY"` with your actual credentials.
+
+```powershell
+python -m venv tranx-venv
+tranx-venv\Scripts\activate
+pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
+pip install paddleocr==2.10.0
+pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
+python server.py --translator tencent
+```
+
+### Windows + Youdao Translate
+
+- [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
+
+- **Setup**:
+  1.  **Get Youdao API Credentials**:
+      Obtain an `APP_KEY` and `APP_SECRET` from the [Youdao AI Platform](https://ai.youdao.com/console/#/service-provision/text-translation).
+
+  2.  **Set Environment Variables**:
+      You **MUST** set the following environment variables with your Youdao API credentials:
+      - `YOUDAO_TRANSLATOR_APP_KEY="YOUR_APP_KEY"`
+      - `YOUDAO_TRANSLATOR_APP_SECRET="YOUR_APP_SECRET"`
+      Replace `"YOUR_APP_KEY"` and `"YOUR_APP_SECRET"` with your actual credentials.
+
+```powershell
+python -m venv tranx-venv
+tranx-venv\Scripts\activate
+pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
+pip install paddleocr==2.10.0
+pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
+python server.py --translator youdao
+```
+
 ### Windows + NLLB + Nvidia
 
 Тестировалось с NVIDIA GeForce RTX 4060 Ti (8188MiB)
