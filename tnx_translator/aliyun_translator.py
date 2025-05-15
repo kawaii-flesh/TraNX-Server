@@ -54,10 +54,6 @@ class AliyunTranslator(Translator):
             Exception: If translation fails with API error
         """
         try:
-            # Convert language codes
-            src_lang = self.convert_lang_code(src_lang, list(self._lang_map.keys()))
-            dest_lang = self.convert_lang_code(dest_lang, list(self._lang_map.keys()))
-            
             # Prepare request
             runtime = RuntimeOptions()
             translated = []
