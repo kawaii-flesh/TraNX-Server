@@ -332,7 +332,7 @@ def upload_screenshot():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run OCR translation server.")
-    parser.add_argument("--translator", type=str, choices=["nllb", "google", "baidu"])
+    parser.add_argument("--translator", type=str, choices=["nllb", "google", "baidu", "aliyun", "tencent", "youdao"])
     args = parser.parse_args()
 
     translator = get_translator(args.translator)
