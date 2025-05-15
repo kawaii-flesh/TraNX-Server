@@ -85,7 +85,6 @@ tranx-venv\Scripts\activate
 pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
 pip install paddleocr==2.10.0
 pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
-pip install tencentcloud-sdk-python
 python server.py --translator tencent
 ```
 
