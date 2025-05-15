@@ -10,7 +10,7 @@ class GoogleWebTranslator(Translator):
         'jpn': 'ja',
         'kor': 'ko',
         'rus': 'ru',
-        'zho': 'zh',
+        'zho': 'zh-cn',
         'ukr': 'uk'
     }
 

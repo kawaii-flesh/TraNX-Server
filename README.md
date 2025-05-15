@@ -20,9 +20,7 @@ python server.py --translator google
 
 ### Windows + Baidu Translate
 
-- **Requirements**:
-  - Python (if not already installed from other setups).
-  - Baidu Translate API App ID and App Key.
+- [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 
 - **Setup**:
   1.  **Get Baidu API Credentials**:
@@ -34,17 +32,15 @@ python server.py --translator google
       - `BAIDU_TRANSLATOR_APP_KEY="YOUR_APP_KEY"`
       Replace `"YOUR_APP_ID"` and `"YOUR_APP_KEY"` with your actual credentials.
 
-  3.  **Install Dependencies (if needed)**:
-      The `requests` library is required for Baidu Translate. It's likely already installed if you followed other setup instructions (e.g., for Google Translate or NLLB). If not, install it:
-      ```powershell
-      pip install requests
-      ```
-      (Other dependencies like `paddleocr`, `flask`, etc., are assumed to be installed as per other sections.)
+```powershell
+python -m venv tranx-venv
+tranx-venv\Scripts\activate
+pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
+pip install paddleocr==2.10.0
+pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
+python server.py --translator baidu
+```
 
-  4.  **Run the Server with Baidu Translator**:
-      ```powershell
-      python server.py --translator baidu
-      ```
 ### Windows + NLLB + Nvidia
 
 Тестировалось с NVIDIA GeForce RTX 4060 Ti (8188MiB)
