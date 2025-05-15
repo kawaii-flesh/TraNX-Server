@@ -19,24 +19,16 @@ class AliyunTranslator(Translator):
             endpoint='mt.cn-hangzhou.aliyuncs.com'
         )
         self.client = Client(config)
-        self._lang_map = {
-            'zh': 'zh',
-            'en': 'en',
-            'ja': 'ja',
-            'ko': 'ko',
-            'fr': 'fr',
-            'es': 'es',
-            'it': 'it',
-            'de': 'de',
-            'ru': 'ru',
-            'pt': 'pt',
-            'vi': 'vi',
-            'id': 'id',
-            'th': 'th',
-            'ms': 'ms',
-            'ar': 'ar',
-            'tr': 'tr'
-        }
+    ALIYUN_LANG_MAP = {
+        'eng': 'en',
+        'fra': 'fr',
+        'deu': 'de',
+        'jpn': 'ja',
+        'kor': 'ko',
+        'rus': 'ru',
+        'zho': 'zh',
+        'ukr': 'ru'  # Aliyun doesn't support Ukrainian, fallback to Russian
+    }
 
     def translate(self, sentences: List[str], src_lang: str, dest_lang: str) -> List[str]:
         """Translate a list of sentences from source language to target language
@@ -103,4 +95,4 @@ class AliyunTranslator(Translator):
         Returns:
             Dict[str, str]: Dictionary mapping standard codes to Aliyun codes
         """
-        return self._lang_map
+        return self.ALIYUN_LANG_MAP
