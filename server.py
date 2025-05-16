@@ -17,7 +17,7 @@ from tnx_translator import Translator, get_translator
 LANGUAGE_CODES = ['eng', 'rus', 'ukr', 'deu', 'fra', 'jpn', 'kor', 'zho']
 SAVE_DIR = "./data"
 DEFAULT_CONFIG = {
-    "version": "2.1.0",
+    "version": "2.2.0",
     "image_processing": {
         "contrast": 1.0,
         "brightness": 1.0,
@@ -332,7 +332,7 @@ def upload_screenshot():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run OCR translation server.")
-    parser.add_argument("--translator", type=str, choices=["nllb", "google", "baidu"])
+    parser.add_argument("--translator", type=str, choices=["nllb", "google", "baidu", "aliyun", "tencent", "youdao"])
     args = parser.parse_args()
 
     translator = get_translator(args.translator)
