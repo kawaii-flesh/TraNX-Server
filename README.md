@@ -2,6 +2,11 @@
 
 TraNX-Server - OCR + перевод для экранного переводчика [TraNX](https://github.com/kawaii-flesh/TraNX)
 
+中文说明: [README-zh.md](README-zh.md)
+
+English Introduction: [README-en.md](README-en.md)
+
+
 ## Устновка и запуск
 
 ### Windows + Google Translate
