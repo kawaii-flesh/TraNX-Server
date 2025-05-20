@@ -30,7 +30,7 @@ python -m venv tranx-venv
 tranx-venv\Scripts\activate
 pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
 pip install paddleocr==2.10.0
-pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
+pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==3.20.2 requests==2.32.3 symspellpy==6.9.0
 set BAIDU_TRANSLATOR_APP_ID=APP_ID
 set BAIDU_TRANSLATOR_APP_KEY=APP_KEY
 python server.py --translator baidu
@@ -48,7 +48,7 @@ python -m venv tranx-venv
 tranx-venv\Scripts\activate
 pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
 pip install paddleocr==2.10.0
-pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
+pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==3.20.2 requests==2.32.3 symspellpy==6.9.0
 pip install alibabacloud-alimt20181012==1.5.0
 set ALIYUN_TRANSLATOR_ACCESS_KEY_ID=ACCESS_KEY_ID
 set ALIYUN_TRANSLATOR_ACCESS_KEY_SECRET=ACCESS_KEY_SECRET
@@ -67,7 +67,7 @@ python -m venv tranx-venv
 tranx-venv\Scripts\activate
 pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
 pip install paddleocr==2.10.0
-pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
+pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==3.20.2 requests==2.32.3 symspellpy==6.9.0
 set TENCENT_TRANSLATOR_SECRET_ID=SECRET_ID
 set TENCENT_TRANSLATOR_SECRET_KEY=SECRET_KEY
 python server.py --translator tencent
@@ -85,7 +85,7 @@ python -m venv tranx-venv
 tranx-venv\Scripts\activate
 pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
 pip install paddleocr==2.10.0
-pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
+pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==3.20.2 requests==2.32.3 symspellpy==6.9.0
 set YOUDAO_TRANSLATOR_APP_KEY=APP_KEY
 set YOUDAO_TRANSLATOR_APP_SECRET=APP_SECRET
 python server.py --translator youdao
