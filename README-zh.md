@@ -2,7 +2,7 @@
 
 TraNX-Server - 屏幕OCR翻译器，配套插件：[TraNX](https://github.com/kawaii-flesh/TraNX) 
 
-Инструкции на русском языке: [README-zh.md](README-zh.md)
+Инструкции на русском языке: [README.md](README.md)
 
 English Introduction: [README-en.md](README-en.md)
 
