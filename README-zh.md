@@ -1,15 +1,14 @@
 # TraNX-Server
 
-TraNX-Server - OCR + перевод для экранного переводчика [TraNX](https://github.com/kawaii-flesh/TraNX)
+TraNX-Server - 屏幕OCR翻译器，配套插件：[TraNX](https://github.com/kawaii-flesh/TraNX) 
 
-中文说明: [README-zh.md](README-zh.md)
+Инструкции на русском языке: [README.md](README.md)
 
 English Introduction: [README-en.md](README-en.md)
 
+## 安装与启动
 
-## Устновка и запуск
-
-### Windows + Google Translate
+### Windows + 谷歌翻译
 
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 
@@ -23,12 +22,12 @@ pip install googletrans==4.0.0-rc1
 python server.py --translator google
 ```
 
-### Windows + Baidu Translate
+### Windows + 百度翻译
 
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 
-- **Get Keys**:
-  Получите `APP_ID` и `APP_KEY` из [Baidu Translate API Console](https://fanyi-api.baidu.com/manage/developer).
+- **获取密钥**：
+从 [百度翻译 API 控制台](https://fanyi-api.baidu.com/manage/developer) 获取 `APP_ID` 和 `APP_KEY`。
 
 ```cmd
 python -m venv tranx-venv
@@ -41,12 +40,12 @@ set BAIDU_TRANSLATOR_APP_KEY=APP_KEY
 python server.py --translator baidu
 ```
 
-### Windows + Aliyun Translate
+### Windows + 阿里云翻译
 
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 
-- **Get Keys**:
-Получите `ACCESS_KEY_ID` и `ACCESS_KEY_SECRET` из [Aliyun RAM Console](https://ram.console.aliyun.com/).
+- **获取密钥**：
+从 [阿里云 RAM 控制台](https://ram.console.aliyun.com/) 获取 `ACCESS_KEY_ID` 和 `ACCESS_KEY_SECRET`。
 
 ```cmd
 python -m venv tranx-venv
@@ -60,12 +59,12 @@ set ALIYUN_TRANSLATOR_ACCESS_KEY_SECRET=ACCESS_KEY_SECRET
 python server.py --translator aliyun
 ```
 
-### Windows + Tencent Translate
+### Windows + 腾讯翻译
 
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 
-- **Get Keys**:
-Получите `SECRET_ID` и `SECRET_KEY` из [Tencent Cloud Console](https://console.cloud.tencent.com/cam/capi).
+- **获取密钥**：
+从 [腾讯云控制台](https://console.cloud.tencent.com/cam/capi) 获取 `SECRET_ID` 和 `SECRET_KEY`。
 
 ```cmd
 python -m venv tranx-venv
@@ -78,12 +77,12 @@ set TENCENT_TRANSLATOR_SECRET_KEY=SECRET_KEY
 python server.py --translator tencent
 ```
 
-### Windows + Youdao Translate
+### Windows + 有道翻译
 
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 
-- **Get Keys**:
-Получите `APP_KEY` и `APP_SECRET` из [Youdao AI Platform](https://ai.youdao.com/console/#/service-provision/text-translation).
+- **获取密钥**：
+从 [有道 AI 平台](https://ai.youdao.com/console/#/service-provision/text-translation) 获取 `APP_KEY` 和 `APP_SECRET`。
 
 ```cmd
 python -m venv tranx-venv
@@ -98,11 +97,11 @@ python server.py --translator youdao
 
 ### Windows + NLLB + Nvidia
 
-Тестировалось с NVIDIA GeForce RTX 4060 Ti (8188MiB)
+已在 NVIDIA GeForce RTX 4060 Ti (8188MiB) 上进行测试。
 
-Если у вас недостаточно памяти для разворачивания модели [facebook/nllb-200-1.3B](https://huggingface.co/facebook/nllb-200-1.3B), то попробуйте [facebook/nllb-200-distilled-600M](https://huggingface.co/facebook/nllb-200-distilled-600M) указав ее в [tnx_translator/nllb_translator.py](https://github.com/kawaii-flesh/TraNX-Server/blob/main/tnx_translator/nllb_translator.py) -> `model_name`
+如果您的内存不足以部署 [facebook/nllb-200-1.3B](https://huggingface.co/facebook/nllb-200-1.3B) 模型，可以尝试 [facebook/nllb-200-distilled-600M](https://huggingface.co/facebook/nllb-200-distilled-600M)，并在 [tnx_translator/nllb_translator.py](https://github.com/kawaii-flesh/TraNX-Server/blob/main/tnx_translator/nllb_translator.py) 中指定 `model_name`。
 
-Если вы обладаете большей памятью, то поробуйте [facebook/nllb-200-3.3B](https://huggingface.co/facebook/nllb-200-3.3B)
+如果您有更多的内存，可以尝试 [facebook/nllb-200-3.3B](https://huggingface.co/facebook/nllb-200-3.3B)。
 
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 - [CUDA 11.8](https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_522.06_windows.exe)
@@ -136,15 +135,15 @@ pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==
 python server.py --translator nllb
 ```
 
-## Использование веб-конфигуратора
+## 使用 Web 配置器
 
-После запуска сервера на корневом URL будет доступен веб интерфейс для управления параметрами обработки изображения, OCR, переводчика
+服务器启动后，在根 URL 上可以访问一个 Web 界面，用于管理图像、OCR 和翻译器的处理参数。
 
-После первого запроса `TraNX` будет создан конфигурационный файл для конкретного тайтла, а также скрин — на примере которого можно настроить обработку изображения
+第一次请求 `TraNX` 后，将为特定标题创建一个配置文件，以及一个屏幕截图，可用于调整图像的处理。
 
-![WEB-Configurator](/screenshots/web-config.png)
+![Web 配置器](/screenshots/web-config.png)
 
 ----------------------------------------------------
-При использовании Youdao, Tencent, Aliyun, Baidu Translate необходимо снять флажок **Разделить текст на предложения для перевода** в разделе **Обработка текста**.
+使用有道、腾讯、阿里云、百度翻译时，需要在 **Text Processing** 部分取消勾选 **Split Text into Sentences for Translation**。
 
-![WEB-Configurator](/screenshots/web-config2.png)
+![Web 配置器](/screenshots/web-config2.png)

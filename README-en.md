@@ -1,13 +1,12 @@
 # TraNX-Server
 
-TraNX-Server - OCR + перевод для экранного переводчика [TraNX](https://github.com/kawaii-flesh/TraNX)
+TraNX-Server - OCR + translation for the screen translator [TraNX](https://github.com/kawaii-flesh/TraNX)
+
+Инструкции на русском языке: [README.md](README.md)
 
 中文说明: [README-zh.md](README-zh.md)
 
-English Introduction: [README-en.md](README-en.md)
-
-
-## Устновка и запуск
+## Installation and Startup
 
 ### Windows + Google Translate
 
@@ -28,7 +27,7 @@ python server.py --translator google
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 
 - **Get Keys**:
-  Получите `APP_ID` и `APP_KEY` из [Baidu Translate API Console](https://fanyi-api.baidu.com/manage/developer).
+Get `APP_ID` and `APP_KEY` from [Baidu Translate API Console](https://fanyi-api.baidu.com/manage/developer).
 
 ```cmd
 python -m venv tranx-venv
@@ -46,7 +45,7 @@ python server.py --translator baidu
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 
 - **Get Keys**:
-Получите `ACCESS_KEY_ID` и `ACCESS_KEY_SECRET` из [Aliyun RAM Console](https://ram.console.aliyun.com/).
+Get `ACCESS_KEY_ID` and `ACCESS_KEY_SECRET` from [Aliyun RAM Console](https://ram.console.aliyun.com/).
 
 ```cmd
 python -m venv tranx-venv
@@ -65,7 +64,7 @@ python server.py --translator aliyun
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 
 - **Get Keys**:
-Получите `SECRET_ID` и `SECRET_KEY` из [Tencent Cloud Console](https://console.cloud.tencent.com/cam/capi).
+Get `SECRET_ID` and `SECRET_KEY` from [Tencent Cloud Console](https://console.cloud.tencent.com/cam/capi).
 
 ```cmd
 python -m venv tranx-venv
@@ -83,7 +82,7 @@ python server.py --translator tencent
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 
 - **Get Keys**:
-Получите `APP_KEY` и `APP_SECRET` из [Youdao AI Platform](https://ai.youdao.com/console/#/service-provision/text-translation).
+Get `APP_KEY` and `APP_SECRET` from [Youdao AI Platform](https://ai.youdao.com/console/#/service-provision/text-translation).
 
 ```cmd
 python -m venv tranx-venv
@@ -98,11 +97,11 @@ python server.py --translator youdao
 
 ### Windows + NLLB + Nvidia
 
-Тестировалось с NVIDIA GeForce RTX 4060 Ti (8188MiB)
+Tested with NVIDIA GeForce RTX 4060 Ti (8188MiB)
 
-Если у вас недостаточно памяти для разворачивания модели [facebook/nllb-200-1.3B](https://huggingface.co/facebook/nllb-200-1.3B), то попробуйте [facebook/nllb-200-distilled-600M](https://huggingface.co/facebook/nllb-200-distilled-600M) указав ее в [tnx_translator/nllb_translator.py](https://github.com/kawaii-flesh/TraNX-Server/blob/main/tnx_translator/nllb_translator.py) -> `model_name`
+If you don't have enough memory to deploy the [facebook/nllb-200-1.3B](https://huggingface.co/facebook/nllb-200-1.3B) model, try [facebook/nllb-200-distilled-600M](https://huggingface.co/facebook/nllb-200-distilled-600M) by specifying it in [tnx_translator/nllb_translator.py](https://github.com/kawaii-flesh/TraNX-Server/blob/main/tnx_translator/nllb_translator.py) -> `model_name`
 
-Если вы обладаете большей памятью, то поробуйте [facebook/nllb-200-3.3B](https://huggingface.co/facebook/nllb-200-3.3B)
+If you have more memory, try [facebook/nllb-200-3.3B](https://huggingface.co/facebook/nllb-200-3.3B)
 
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)
 - [CUDA 11.8](https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_522.06_windows.exe)
@@ -136,15 +135,15 @@ pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==
 python server.py --translator nllb
 ```
 
-## Использование веб-конфигуратора
+## Using the Web Configurator
 
-После запуска сервера на корневом URL будет доступен веб интерфейс для управления параметрами обработки изображения, OCR, переводчика
+After starting the server, a web interface will be available at the root URL for managing the image processing, OCR, and translator parameters.
 
-После первого запроса `TraNX` будет создан конфигурационный файл для конкретного тайтла, а также скрин — на примере которого можно настроить обработку изображения
+After the first `TraNX` request, a configuration file will be created for a specific title, along with a screenshot, which can be used to adjust the image processing.
 
 ![WEB-Configurator](/screenshots/web-config.png)
 
 ----------------------------------------------------
-При использовании Youdao, Tencent, Aliyun, Baidu Translate необходимо снять флажок **Разделить текст на предложения для перевода** в разделе **Обработка текста**.
+When using Youdao, Tencent, Aliyun, or Baidu Translate, you need to uncheck the **Split text into sentences for translation** option in the **Text Processing** section.
 
 ![WEB-Configurator](/screenshots/web-config2.png)
