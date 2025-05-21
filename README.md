@@ -18,7 +18,7 @@ python -m venv tranx-venv
 tranx-venv\Scripts\activate
 pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
 pip install paddleocr==2.10.0
-pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
+pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==3.20.2 requests==2.32.3 symspellpy==6.9.0
 pip install googletrans==4.0.0-rc1
 python server.py --translator google
 ```
@@ -116,7 +116,7 @@ pip install torch==2.2.2+cu118 torchvision torchaudio --index-url https://downlo
 pip install transformers==4.51.3
 pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
 pip install paddleocr==2.10.0
-pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
+pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==3.20.2 requests==2.32.3 symspellpy==6.9.0
 python server.py --translator nllb
 ```
 
@@ -132,7 +132,7 @@ pip install torch==2.2.2+cpu torchvision torchaudio --index-url https://download
 pip install transformers==4.51.3
 pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/windows/cpu-mkl-avx/stable.html
 pip install paddleocr==2.10.0
-pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==6.30.2 requests==2.32.3 symspellpy==6.9.0
+pip install flask==3.1.0 pillow==11.0.0 opencv-python==4.11.0.86 sentencepiece==0.2.0 protobuf==3.20.2 requests==2.32.3 symspellpy==6.9.0
 python server.py --translator nllb
 ```
 
@@ -145,6 +145,6 @@ python server.py --translator nllb
 ![WEB-Configurator](/screenshots/web-config.png)
 
 ----------------------------------------------------
-При использовании Youdao, Tencent, Aliyun, Baidu Translate необходимо снять флажок **Разделить текст на предложения для перевода** в разделе **Обработка текста**.
+При использовании Youdao, Tencent, Aliyun, Baidu Translate необходимо снять флажок **Split text into sentences for translation** в разделе **Text Processing**.
 
 ![WEB-Configurator](/screenshots/web-config2.png)
