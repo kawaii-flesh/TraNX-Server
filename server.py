@@ -14,7 +14,7 @@ import argparse
 import helpers
 from tnx_translator import Translator, get_translator
 
-LANGUAGE_CODES = ['eng', 'rus', 'ukr', 'deu', 'fra', 'jpn', 'kor', 'zho', , 'zht']
+LANGUAGE_CODES = ['eng', 'rus', 'ukr', 'deu', 'fra', 'jpn', 'kor', 'zho', 'zht']
 SAVE_DIR = "./data"
 DEFAULT_CONFIG = {
     "version": "2.2.0",
