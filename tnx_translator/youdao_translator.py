@@ -15,6 +15,7 @@ class YoudaoTranslator(Translator):
         'kor': 'ko',
         'rus': 'ru',
         'zho': 'zh-CHS',
+        'zht': 'zh-CHT',
         'ukr': 'uk'
     }
 
