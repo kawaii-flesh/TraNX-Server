@@ -66,6 +66,8 @@ def get_config_path():
 
 def load_config():
     config_path = get_config_path()
+    config_needs_saving = False # Flag to indicate if config was created/reset
+
     if os.path.exists(config_path):
         with open(config_path, 'r') as f:
             config = json.load(f)
@@ -75,16 +77,23 @@ def load_config():
                 new_path = f"{config_path}.v{config.get('version', '1.0.0')}"
                 os.rename(config_path, new_path)
                 config = DEFAULT_CONFIG.copy()
-                with open(config_path, 'w') as new_f:
-                    json.dump(config, new_f, indent=4)
-            load_models_from_config(config)
-            return config
+                config_needs_saving = True # Mark for saving after adjustment
     else:
         config = DEFAULT_CONFIG.copy()
+        config_needs_saving = True # Mark for saving after adjustment
+
+    # Adjust paddleocr lang based on translation src_lang
+    if config["translation"]["src_lang"] in ["zho", "zht"]:
+        config["paddleocr"]["lang"] = "ch"
+    else:
+        config["paddleocr"]["lang"] = "en"
+
+    if config_needs_saving:
         with open(config_path, 'w') as f:
-            json.dump(config, f, indent=4)
-        load_models_from_config(config)
-        return config
+            json.dump(config, f, indent=4) # Save the (potentially) modified config
+
+    load_models_from_config(config)
+    return config
 
 def save_config(config):
     config_path = get_config_path()
@@ -180,17 +189,27 @@ def save_config_pid(pid):
     global global_pid
     global_pid = pid
     try:
-        new_config = request.json
-        config = load_config()
-        if 'image_processing' in new_config:
-            config['image_processing'].update(new_config['image_processing'])
-        if 'paddleocr' in new_config:
-            config['paddleocr'].update(new_config['paddleocr'])
-        if 'translation' in new_config:
-            config['translation'].update(new_config['translation'])
-        if 'text_processing' in new_config:
-            config['text_processing'].update(new_config['text_processing'])
-        save_config(config)
+        new_config_data = request.json # Renamed for clarity
+        config = load_config() # Load current config (it will have paddleocr.lang already adjusted by load_config)
+
+        # Apply updates from new_config_data
+        if 'image_processing' in new_config_data:
+            config['image_processing'].update(new_config_data['image_processing'])
+        if 'paddleocr' in new_config_data: # User might directly change paddleocr settings
+            config['paddleocr'].update(new_config_data['paddleocr'])
+        if 'text_processing' in new_config_data:
+            config['text_processing'].update(new_config_data['text_processing'])
+        
+        # Handle translation update and dependent paddleocr lang
+        if 'translation' in new_config_data:
+            config['translation'].update(new_config_data['translation'])
+            # Now, adjust paddleocr.lang based on the new src_lang
+            if config["translation"]["src_lang"] in ["zh", "cht"]:
+                config["paddleocr"]["lang"] = "ch"
+            else:
+                config["paddleocr"]["lang"] = "en"
+        
+        save_config(config) # save_config just dumps to json and calls load_models_from_config
         process_current_image()
         return jsonify({"status": "success"})
     except Exception as e:
