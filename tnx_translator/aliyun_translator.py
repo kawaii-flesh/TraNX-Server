@@ -27,6 +27,7 @@ class AliyunTranslator(Translator):
         'kor': 'ko',
         'rus': 'ru',
         'zho': 'zh',
+        'zht': 'zh-tw',
         'ukr': 'ru'  # Aliyun doesn't support Ukrainian, fallback to Russian
     }
 

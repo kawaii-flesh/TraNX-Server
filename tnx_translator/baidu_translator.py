@@ -14,6 +14,7 @@ class BaiduTranslator(Translator):
         'kor': 'kor',
         'rus': 'ru',
         'zho': 'zh',
+        'zht': 'cht',
         'ukr': 'ukr'
     }
 

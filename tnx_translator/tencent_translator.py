@@ -15,6 +15,7 @@ class TencentTranslator(Translator):
         'kor': 'ko',
         'rus': 'ru',
         'zho': 'zh',
+        'zht': 'zh-TW',
         'ukr': 'uk'
     }
 
