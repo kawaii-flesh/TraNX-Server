@@ -1,23 +1,30 @@
 import re
 
+
 def normalize_ellipsis(text):
     return re.sub(r"\.{2,}", "...", text)
+
 
 def get_aspect_ratio(text):
     cjk_count = sum(1 for ch in text if is_cjk(ch))
     return 1.05 if cjk_count / max(len(text), 1) > 0.5 else 0.57
 
+
 def is_cjk(char):
-    return any([
-        '\u4e00' <= char <= '\u9fff',  # CJK Unified Ideographs
-        '\u3040' <= char <= '\u309f',  # Hiragana
-        '\u30a0' <= char <= '\u30ff',  # Katakana
-        '\uac00' <= char <= '\ud7af'   # Hangul
-    ])
+    return any(
+        [
+            "\u4e00" <= char <= "\u9fff",  # CJK Unified Ideographs
+            "\u3040" <= char <= "\u309f",  # Hiragana
+            "\u30a0" <= char <= "\u30ff",  # Katakana
+            "\uac00" <= char <= "\ud7af",  # Hangul
+        ]
+    )
+
 
 def is_cjk_text(text):
     cjk_count = sum(1 for char in text if is_cjk(char))
     return cjk_count / max(len(text), 1) > 0.5
+
 
 def wrap_text(text, max_chars_per_line):
     if is_cjk_text(text):
@@ -45,8 +52,10 @@ def wrap_text(text, max_chars_per_line):
             lines.append(" ".join(current_line))
         return "\n".join(lines)
 
+
 def to_hex_16(num):
     return f"{num:016X}"
+
 
 def split_into_sentences(text):
     text = normalize_ellipsis(text)
@@ -58,9 +67,9 @@ def split_into_sentences(text):
         char = text[i]
         current_sentence += char
 
-        if char in {'.', '!', '?', '。', '！', '？'}:
-            if char == '.' and i + 2 < n and text[i+1] == '.' and text[i+2] == '.':
-                current_sentence += '..'
+        if char in {".", "!", "?", "。", "！", "？"}:
+            if char == "." and i + 2 < n and text[i + 1] == "." and text[i + 2] == ".":
+                current_sentence += ".."
                 i += 2
             sentences.append(current_sentence.strip())
             current_sentence = ""

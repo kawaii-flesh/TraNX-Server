@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
 
+
 class Translator(ABC):
     @abstractmethod
-    def translate(self, sentences: List[str], src_lang: str, dest_lang: str) -> List[str]:
+    def translate(
+        self, sentences: List[str], src_lang: str, dest_lang: str
+    ) -> List[str]:
         pass
 
     @abstractmethod

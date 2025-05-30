@@ -3,6 +3,7 @@ from tnx_translator.tencent_translator import TencentTranslator
 from tnx_translator.aliyun_translator import AliyunTranslator
 from tnx_translator.youdao_translator import YoudaoTranslator
 
+
 def test_baidu():
     print("Baidu Translator Test")
     print("---------------------")
@@ -22,8 +23,12 @@ def test_baidu():
 
     print("---------------------")
     sentence_to_translate = input("Please input the sentence to translate: ")
-    source_lang = input("Please input the source language code (e.g., 'en' for English, 'zh' for Chinese): ")
-    destination_lang = input("Please input the destination language code (e.g., 'zh' for Chinese, 'en' for English): ")
+    source_lang = input(
+        "Please input the source language code (e.g., 'en' for English, 'zh' for Chinese): "
+    )
+    destination_lang = input(
+        "Please input the destination language code (e.g., 'zh' for Chinese, 'en' for English): "
+    )
 
     if not sentence_to_translate.strip():
         print("Error: Sentence to translate is empty.")
@@ -35,13 +40,16 @@ def test_baidu():
 
     print("\ntranslating...")
     try:
-        translated_sentences = translator.translate([sentence_to_translate], source_lang, destination_lang)
+        translated_sentences = translator.translate(
+            [sentence_to_translate], source_lang, destination_lang
+        )
         if translated_sentences:
             print(f"result: {translated_sentences[0]}")
         else:
             print("translation failed.")
     except Exception as e:
         print(f"translation err {e}")
+
 
 def test_tencent():
     print("Tencent Translator Test")
@@ -62,8 +70,12 @@ def test_tencent():
 
     print("---------------------")
     sentence_to_translate = input("Please input the sentence to translate: ")
-    source_lang = input("Please input the source language code (e.g., 'en' for English, 'zh' for Chinese): ")
-    destination_lang = input("Please input the destination language code (e.g., 'zh' for Chinese, 'en' for English): ")
+    source_lang = input(
+        "Please input the source language code (e.g., 'en' for English, 'zh' for Chinese): "
+    )
+    destination_lang = input(
+        "Please input the destination language code (e.g., 'zh' for Chinese, 'en' for English): "
+    )
 
     if not sentence_to_translate.strip():
         print("Error: Sentence to translate is empty.")
@@ -75,13 +87,16 @@ def test_tencent():
 
     print("\ntranslating...")
     try:
-        translated_sentences = translator.translate([sentence_to_translate], source_lang, destination_lang)
+        translated_sentences = translator.translate(
+            [sentence_to_translate], source_lang, destination_lang
+        )
         if translated_sentences:
             print(f"result: {translated_sentences[0]}")
         else:
             print("translation failed.")
     except Exception as e:
         print(f"translation err {e}")
+
 
 def test_aliyun():
     print("Aliyun Translator Test")
@@ -95,15 +110,21 @@ def test_aliyun():
         return
 
     try:
-        translator = AliyunTranslator(access_key_id=access_key_id, access_key_secret=access_key_secret)
+        translator = AliyunTranslator(
+            access_key_id=access_key_id, access_key_secret=access_key_secret
+        )
     except ValueError as e:
         print(f"init error: {e}")
         return
 
     print("---------------------")
     sentence_to_translate = input("Please input the sentence to translate: ")
-    source_lang = input("Please input the source language code (e.g., 'en' for English, 'zh' for Chinese): ")
-    destination_lang = input("Please input the destination language code (e.g., 'zh' for Chinese, 'en' for English): ")
+    source_lang = input(
+        "Please input the source language code (e.g., 'en' for English, 'zh' for Chinese): "
+    )
+    destination_lang = input(
+        "Please input the destination language code (e.g., 'zh' for Chinese, 'en' for English): "
+    )
 
     if not sentence_to_translate.strip():
         print("Error: Sentence to translate is empty.")
@@ -115,13 +136,16 @@ def test_aliyun():
 
     print("\ntranslating...")
     try:
-        translated_sentences = translator.translate([sentence_to_translate], source_lang, destination_lang)
+        translated_sentences = translator.translate(
+            [sentence_to_translate], source_lang, destination_lang
+        )
         if translated_sentences:
             print(f"result: {translated_sentences[0]}")
         else:
             print("translation failed.")
     except Exception as e:
         print(f"translation err {e}")
+
 
 def test_youdao():
     print("Youdao Translator Test")
@@ -142,8 +166,12 @@ def test_youdao():
 
     print("---------------------")
     sentence_to_translate = input("Please input the sentence to translate: ")
-    source_lang = input("Please input the source language code (e.g., 'en' for English, 'zh' for Chinese): ")
-    destination_lang = input("Please input the destination language code (e.g., 'zh' for Chinese, 'en' for English): ")
+    source_lang = input(
+        "Please input the source language code (e.g., 'en' for English, 'zh' for Chinese): "
+    )
+    destination_lang = input(
+        "Please input the destination language code (e.g., 'zh' for Chinese, 'en' for English): "
+    )
 
     if not sentence_to_translate.strip():
         print("Error: Sentence to translate is empty.")
@@ -155,13 +183,16 @@ def test_youdao():
 
     print("\ntranslating...")
     try:
-        translated_sentences = translator.translate([sentence_to_translate], source_lang, destination_lang)
+        translated_sentences = translator.translate(
+            [sentence_to_translate], source_lang, destination_lang
+        )
         if translated_sentences:
             print(f"result: {translated_sentences[0]}")
         else:
             print("translation failed.")
     except Exception as e:
         print(f"translation err {e}")
+
 
 def main():
     print("Translator Test Program")
@@ -171,9 +202,9 @@ def main():
     print("3. Test Aliyun Translator")
     print("4. Test Youdao Translator")
     print("0. Exit")
-    
+
     choice = input("\nPlease select a translator to test (0-4): ")
-    
+
     if choice == "1":
         test_baidu()
     elif choice == "2":
@@ -186,6 +217,7 @@ def main():
         print("Exiting...")
     else:
         print("Invalid choice. Please try again.")
+
 
 if __name__ == "__main__":
     main()
