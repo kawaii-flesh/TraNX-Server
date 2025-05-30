@@ -3,6 +3,7 @@ from .translator_interface import Translator
 from typing import List, Dict
 
 class GoogleWebTranslator(Translator):
+    # https://py-googletrans.readthedocs.io/en/latest/#googletrans-languages
     GOOGLE_LANG_MAP = {
         'eng': 'en',
         'fra': 'fr',
@@ -11,7 +12,8 @@ class GoogleWebTranslator(Translator):
         'kor': 'ko',
         'rus': 'ru',
         'zho': 'zh-cn',
-        'ukr': 'uk'
+        'ukr': 'uk',
+        'zht': 'zh-tw'
     }
 
     def __init__(self):

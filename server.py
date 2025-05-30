@@ -14,10 +14,24 @@ import argparse
 import helpers
 from tnx_translator import Translator, get_translator
 
+# https://en.wikipedia.org/wiki/ISO_639-3
 LANGUAGE_CODES = ['eng', 'rus', 'ukr', 'deu', 'fra', 'jpn', 'kor', 'zho', 'zht']
+# https://github.com/PaddlePaddle/PaddleOCR/blob/fd5b4e1049b758cf29b3c922a19b4c5f4ec47b88/docs/version2.x/ppocr/blog/multi_languages.en.md
+OCR_LANG_MAP = {
+    'eng': 'en', 
+    'rus': 'ru', 
+    'ukr': 'uk', 
+    'deu': 'german', 
+    'fra': 'fr', 
+    'jpn': 'japan', 
+    'kor': 'korean', 
+    'zho': 'ch', 
+    'zht': 'chinese_cht'
+}
+
 SAVE_DIR = "./data"
 DEFAULT_CONFIG = {
-    "version": "2.2.0",
+    "version": "3.0.0",
     "image_processing": {
         "contrast": 1.0,
         "brightness": 1.0,
@@ -27,7 +41,6 @@ DEFAULT_CONFIG = {
         "invert": False
     },
     "paddleocr": {
-        "lang": "en",
         "use_angle_cls": True,
         "rec_algorithm": "CRNN"
     },
@@ -49,7 +62,7 @@ global_pid = None
 sym_spell = None
 translator: Translator = None
 
-def load_models_from_config(config):
+def load_dynamic_parts(config):
     global sym_spell
     if config["text_processing"]["enable_symspellpy"]:
         if sym_spell is None:
@@ -76,30 +89,23 @@ def load_config():
             if current_major_version != default_major_version:
                 new_path = f"{config_path}.v{config.get('version', '1.0.0')}"
                 os.rename(config_path, new_path)
-                config = DEFAULT_CONFIG.copy()
-                config_needs_saving = True # Mark for saving after adjustment
+                config_needs_saving = True
     else:
-        config = DEFAULT_CONFIG.copy()
-        config_needs_saving = True # Mark for saving after adjustment
-
-    # Adjust paddleocr lang based on translation src_lang
-    if config["translation"]["src_lang"] in ["zho", "zht"]:
-        config["paddleocr"]["lang"] = "ch"
-    else:
-        config["paddleocr"]["lang"] = "en"
+        config_needs_saving = True
 
     if config_needs_saving:
+        config = DEFAULT_CONFIG.copy()
         with open(config_path, 'w') as f:
-            json.dump(config, f, indent=4) # Save the (potentially) modified config
+            json.dump(config, f, indent=4)
 
-    load_models_from_config(config)
+    load_dynamic_parts(config)
     return config
 
 def save_config(config):
     config_path = get_config_path()
     with open(config_path, 'w') as f:
         json.dump(config, f, indent=4)
-    load_models_from_config(config)
+    load_dynamic_parts(config)
 
 def spell_correct(text):
     global sym_spell
@@ -164,7 +170,7 @@ def apply_image_processing(image, settings):
 def run_ocr(image: Image.Image, config):
     ocr = PaddleOCR(
         use_angle_cls=config["paddleocr"]["use_angle_cls"],
-        lang=config["paddleocr"]["lang"],
+        lang=OCR_LANG_MAP.get(config["translation"]["src_lang"], 'en'),
         rec_algorithm=config["paddleocr"]["rec_algorithm"],
         det_db_score_mode='slow',
     )
@@ -189,27 +195,20 @@ def save_config_pid(pid):
     global global_pid
     global_pid = pid
     try:
-        new_config_data = request.json # Renamed for clarity
-        config = load_config() # Load current config (it will have paddleocr.lang already adjusted by load_config)
+        new_config_data = request.json
+        config = load_config()
 
         # Apply updates from new_config_data
         if 'image_processing' in new_config_data:
             config['image_processing'].update(new_config_data['image_processing'])
-        if 'paddleocr' in new_config_data: # User might directly change paddleocr settings
-            config['paddleocr'].update(new_config_data['paddleocr'])
         if 'text_processing' in new_config_data:
             config['text_processing'].update(new_config_data['text_processing'])
         
-        # Handle translation update and dependent paddleocr lang
+        # Handle translation update
         if 'translation' in new_config_data:
             config['translation'].update(new_config_data['translation'])
-            # Now, adjust paddleocr.lang based on the new src_lang
-            if config["translation"]["src_lang"] in ["zh", "cht"]:
-                config["paddleocr"]["lang"] = "ch"
-            else:
-                config["paddleocr"]["lang"] = "en"
         
-        save_config(config) # save_config just dumps to json and calls load_models_from_config
+        save_config(config) # save_config just dumps to json and calls load_dynamic_parts
         process_current_image()
         return jsonify({"status": "success"})
     except Exception as e:

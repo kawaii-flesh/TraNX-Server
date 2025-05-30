@@ -4,6 +4,7 @@ from .translator_interface import Translator
 from typing import List, Dict
 
 class NLLBTranslator(Translator):
+    # https://huggingface.co/facebook/nllb-200-1.3B/blob/main/README.md -> language_details
     NLLB_LANG_MAP = {
         'eng': 'eng_Latn',
         'fra': 'fra_Latn',
@@ -12,7 +13,8 @@ class NLLBTranslator(Translator):
         'kor': 'kor_Hang',
         'rus': 'rus_Cyrl',
         'zho': 'zho_Hans',
-        'ukr': 'ukr_Cyrl'
+        'ukr': 'ukr_Cyrl',
+        'zht': 'zho_Hant'
     }
     def __init__(self, model_name="facebook/nllb-200-1.3B"):
         self.device = 0 if torch.cuda.is_available() else -1
