@@ -31,7 +31,7 @@ OCR_LANG_MAP = {
 
 SAVE_DIR = "./data"
 DEFAULT_CONFIG = {
-    "version": "3.0.0",
+    "version": "4.0.0",
     "image_processing": {
         "contrast": 1.0,
         "brightness": 1.0,
@@ -43,6 +43,10 @@ DEFAULT_CONFIG = {
     "paddleocr": {"use_angle_cls": True, "rec_algorithm": "CRNN"},
     "translation": {"src_lang": LANGUAGE_CODES[0], "dest_lang": LANGUAGE_CODES[1]},
     "text_processing": {"enable_symspellpy": False, "split_sentences": True},
+    "frames": {
+        "translation_frame": {"startX": 0, "startY": 0, "endX": 0, "endY": 0},
+        "output_frame": {"startX": 0, "startY": 0, "endX": 0, "endY": 0},
+    },
 }
 
 app = Flask(__name__)
@@ -66,8 +70,15 @@ def load_dynamic_parts(config):
         sym_spell = None
 
 
+def get_pid_dir(pid):
+    pid_dir = os.path.join(SAVE_DIR, pid)
+    if not os.path.exists(pid_dir):
+        os.makedirs(pid_dir)
+    return pid_dir
+
+
 def get_config_path():
-    return os.path.join(SAVE_DIR, f"{global_pid}.json")
+    return os.path.join(get_pid_dir(global_pid), "config.json")
 
 
 def load_config():
@@ -227,13 +238,13 @@ def save_config_pid(pid):
 
 
 def process_current_image():
-    origin_path = os.path.join(SAVE_DIR, f"{global_pid}_origin.png")
+    origin_path = os.path.join(get_pid_dir(global_pid), "original.png")
     if not os.path.exists(origin_path):
         return False
     config = load_config()
     image = Image.open(origin_path)
     processed_image = apply_image_processing(image, config["image_processing"])
-    processed_image.save(os.path.join(SAVE_DIR, f"{global_pid}_processed.png"))
+    processed_image.save(os.path.join(get_pid_dir(global_pid), "processed.png"))
     return True
 
 
@@ -294,13 +305,22 @@ def recognize_text_pid(pid):
 @app.route("/image/<pid>/<type>")
 def get_image_pid(pid, type):
     filename = (
-        f"{pid}_origin.png"
+        "original.png"
         if type == "original"
-        else f"{pid}_processed.png" if type == "processed" else None
+        else "processed.png" if type == "processed" else None
     )
     if not filename:
         return "Not found", 404
-    return send_from_directory(SAVE_DIR, filename)
+    return send_from_directory(get_pid_dir(pid), filename)
+
+
+def check_frame(frame):
+    return (
+        frame.get("startX", 0) != 0
+        or frame.get("startY", 0) != 0
+        or frame.get("endX", 0) != 0
+        or frame.get("endY", 0) != 0
+    )
 
 
 @app.route("/upload", methods=["POST"])
@@ -314,12 +334,50 @@ def upload_screenshot():
     image_file = request.files["image"]
     global_pid = helpers.to_hex_16(int(request.form["pid"]))
     print(f"PID: {global_pid}")
+    pid_dir = get_pid_dir(global_pid)
 
     try:
         image = Image.open(image_file.stream)
-        translation_frame = json.loads(request.form.get("translationFrame", "{}"))
-        output_frame = json.loads(request.form.get("outputFrame", "{}"))
-        use_output_frame = request.form.get("useOutputFrame", "false").lower() == "true"
+        config = load_config()
+
+        translation_frame_req = json.loads(request.form.get("translationFrame", "{}"))
+        output_frame_req = json.loads(request.form.get("outputFrame", "{}"))
+
+        request_has_translation_frame = check_frame(translation_frame_req)
+
+        request_has_output_frame = check_frame(output_frame_req)
+
+        config_changed = False
+        if request_has_translation_frame:
+            config["frames"]["translation_frame"] = translation_frame_req
+            config_changed = True
+        if request_has_output_frame:
+            config["frames"]["output_frame"] = output_frame_req
+            config_changed = True
+
+        translation_frame = config["frames"]["translation_frame"]
+        output_frame = config["frames"]["output_frame"]
+        if config_changed:
+            save_config(config)
+
+        if not (check_frame(translation_frame)):
+            return jsonify(
+                {
+                    "text": "At least the translation frame must be specified!",
+                    "x": 10,
+                    "y": 0,
+                    "width": 0,
+                    "height": 24,
+                    "translation_frame": {
+                        "startX": 0,
+                        "startY": 0,
+                        "endX": 0,
+                        "endY": 0,
+                    },
+                    "output_frame": {"startX": 0, "startY": 0, "endX": 0, "endY": 0},
+                    "use_output_frame": False,
+                }
+            )
 
         def get_coords(frame):
             return (
@@ -329,6 +387,7 @@ def upload_screenshot():
                 max(frame["startY"], frame["endY"]),
             )
 
+        use_output_frame = check_frame(output_frame)
         start_x, start_y, end_x, end_y = get_coords(translation_frame)
         render_x, render_y, render_end_x, render_end_y = get_coords(
             output_frame if use_output_frame else translation_frame
@@ -343,13 +402,12 @@ def upload_screenshot():
             return jsonify({"error": "Invalid translation or output area"}), 400
 
         cropped_image = image.crop((start_x, start_y, end_x, end_y))
-        cropped_image.save(os.path.join(SAVE_DIR, f"{global_pid}_origin.png"))
+        cropped_image.save(os.path.join(pid_dir, "original.png"))
 
-        config = load_config()
         processed_image = apply_image_processing(
             cropped_image, config["image_processing"]
         )
-        processed_image.save(os.path.join(SAVE_DIR, f"{global_pid}_processed.png"))
+        processed_image.save(os.path.join(pid_dir, "processed.png"))
 
         _, translated_text, error = process_ocr_and_translation(processed_image, config)
         if error:
@@ -370,15 +428,18 @@ def upload_screenshot():
                 break
             font_height -= 1
 
-        combined_paragraph = {
+        response = {
             "text": wrapped_text,
             "x": render_x,
             "y": render_y,
             "width": frame_width,
             "height": font_height,
+            "translation_frame": translation_frame,
+            "output_frame": output_frame,
+            "use_output_frame": use_output_frame,
         }
 
-        return jsonify({"text": combined_paragraph})
+        return jsonify(response)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
