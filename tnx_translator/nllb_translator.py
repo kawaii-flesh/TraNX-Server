@@ -26,32 +26,24 @@ class NLLBTranslator(Translator):
         if self.device == 0:
             self.model.to("cuda")
 
-    def translate(
-        self, sentences: List[str], src_lang: str, dest_lang: str
-    ) -> List[str]:
+    def translate(self, sentence: str, src_lang: str, dest_lang: str) -> str:
         try:
-            translated_sentences = []
-            for sentence in sentences:
-                inputs = self.tokenizer(
-                    sentence, return_tensors="pt", truncation=True, max_length=512
-                )
-                if self.device == 0:
-                    inputs = {k: v.cuda() for k, v in inputs.items()}
-                forced_token = self.tokenizer._convert_token_to_id_with_added_voc(
-                    dest_lang
-                )
-                output = self.model.generate(
-                    **inputs,
-                    forced_bos_token_id=forced_token,
-                    max_new_tokens=512,
-                    num_beams=4,
-                )
-                translated = self.tokenizer.decode(output[0], skip_special_tokens=True)
-                translated_sentences.append(translated)
-            return translated_sentences
+            inputs = self.tokenizer(
+                sentence, return_tensors="pt", truncation=True, max_length=512
+            )
+            if self.device == 0:
+                inputs = {k: v.cuda() for k, v in inputs.items()}
+            forced_token = self.tokenizer._convert_token_to_id_with_added_voc(dest_lang)
+            output = self.model.generate(
+                **inputs,
+                forced_bos_token_id=forced_token,
+                max_new_tokens=512,
+                num_beams=4,
+            )
+            return self.tokenizer.decode(output[0], skip_special_tokens=True)
         except Exception as e:
             print(f"Translation error (NLLB): {e}")
-            return sentences
+            return sentence  # Return original sentence on error
 
     def get_lang_map(self) -> Dict[str, str]:
         return self.NLLB_LANG_MAP

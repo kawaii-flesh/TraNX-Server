@@ -54,66 +54,46 @@ class YoudaoTranslator(Translator):
         sign = hashlib.sha256(sign_str.encode("utf-8")).hexdigest()
         return sign
 
-    def translate(
-        self, sentences: List[str], src_lang: str, dest_lang: str
-    ) -> List[str]:
-        if not sentences:
-            return []
+    def translate(self, sentence: str, src_lang: str, dest_lang: str) -> str:
+        salt = str(uuid.uuid4())
+        timestamp = str(int(time.time()))
+        sign = self._generate_sign(sentence, salt, timestamp)
 
-        translated_sentences = []
+        params = {
+            "q": sentence,
+            "from": src_lang,
+            "to": dest_lang,
+            "appKey": self.app_key,
+            "salt": salt,
+            "sign": sign,
+            "signType": "v3",
+            "curtime": timestamp,
+        }
 
-        for sentence in sentences:
-            if not sentence.strip():
-                translated_sentences.append("")
-                continue
+        try:
+            response = requests.get(self.api_url, params=params)
+            response.raise_for_status()
+            result = response.json()
 
-            salt = str(uuid.uuid4())
-            timestamp = str(int(time.time()))
-            sign = self._generate_sign(sentence, salt, timestamp)
-
-            params = {
-                "q": sentence,
-                "from": src_lang,
-                "to": dest_lang,
-                "appKey": self.app_key,
-                "salt": salt,
-                "sign": sign,
-                "signType": "v3",
-                "curtime": timestamp,
-            }
-
-            try:
-                response = requests.get(self.api_url, params=params)
-                response.raise_for_status()
-                result = response.json()
-
-                if "translation" in result and result["translation"]:
-                    translated_text = " ".join(result["translation"])
-                    translated_sentences.append(translated_text)
-                elif "errorCode" in result and result["errorCode"] != "0":
-                    print(
-                        f"Youdao API Error: {result.get('errorCode')} - {result.get('msg', 'Unknown error')}"
-                    )
-                    translated_sentences.append(
-                        sentence
-                    )  # Return original sentence on error
-                else:
-                    print(f"Youdao API Error: Unexpected response format: {result}")
-                    translated_sentences.append(sentence)
-
-            except requests.exceptions.RequestException as e:
-                print(f"Translation error (Youdao HTTP): {e}")
-                translated_sentences.append(sentence)
-            except json.JSONDecodeError as e:
+            if "translation" in result and result["translation"]:
+                return " ".join(result["translation"])
+            elif "errorCode" in result and result["errorCode"] != "0":
                 print(
-                    f"Translation error (Youdao JSON Decode): {e} - Response: {response.text}"
+                    f"Youdao API Error: {result.get('errorCode')} - {result.get('msg', 'Unknown error')}"
                 )
-                translated_sentences.append(sentence)
-            except Exception as e:
-                print(f"Translation error (Youdao): {e}")
-                translated_sentences.append(sentence)
+            else:
+                print(f"Youdao API Error: Unexpected response format: {result}")
 
-        return translated_sentences
+        except requests.exceptions.RequestException as e:
+            print(f"Translation error (Youdao HTTP): {e}")
+        except json.JSONDecodeError as e:
+            print(
+                f"Translation error (Youdao JSON Decode): {e} - Response: {response.text}"
+            )
+        except Exception as e:
+            print(f"Translation error (Youdao): {e}")
+
+        return sentence  # Return original sentence on error
 
     def get_lang_map(self) -> Dict[str, str]:
         return self.YOUDAO_LANG_MAP

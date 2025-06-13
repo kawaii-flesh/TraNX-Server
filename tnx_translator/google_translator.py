@@ -21,20 +21,13 @@ class GoogleWebTranslator(Translator):
         self.translator = GoogleTranslator()
         print(">>> Google Translate ready")
 
-    def translate(
-        self, sentences: List[str], src_lang: str, dest_lang: str
-    ) -> List[str]:
-        translated_sentences = []
+    def translate(self, sentence: str, src_lang: str, dest_lang: str) -> str:
         try:
-            for sentence in sentences:
-                result = self.translator.translate(
-                    sentence, src=src_lang, dest=dest_lang
-                )
-                translated_sentences.append(result.text.replace(" -", "-"))
-            return translated_sentences
+            result = self.translator.translate(sentence, src=src_lang, dest=dest_lang)
+            return result.text.replace(" -", "-")
         except Exception as e:
             print(f"Translation error (Google): {e}")
-            return sentences
+            return sentence  # Return original sentence on error
 
     def get_lang_map(self) -> Dict[str, str]:
         return self.GOOGLE_LANG_MAP
