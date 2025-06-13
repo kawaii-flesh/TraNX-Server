@@ -86,71 +86,52 @@ class TencentTranslator(Translator):
 
         return authorization
 
-    def translate(
-        self, sentences: List[str], src_lang: str, dest_lang: str
-    ) -> List[str]:
-        if not sentences:
-            return []
+    def translate(self, sentence: str, src_lang: str, dest_lang: str) -> str:
+        timestamp = int(time.time())
+        params = {
+            "SourceText": sentence,
+            "Source": src_lang,
+            "Target": dest_lang,
+            "ProjectId": 0,
+        }
 
-        translated_sentences = []
+        headers = {
+            "Content-Type": "application/json; charset=utf-8",
+            "Host": "tmt.tencentcloudapi.com",
+            "X-TC-Action": "TextTranslate",
+            "X-TC-Timestamp": str(timestamp),
+            "X-TC-Version": "2018-03-21",
+            "X-TC-Region": "ap-guangzhou",
+            "Authorization": self._generate_sign(params, timestamp),
+        }
 
-        for sentence in sentences:
-            if not sentence.strip():
-                translated_sentences.append("")
-                continue
+        try:
+            response = requests.post(
+                self.api_url, data=json.dumps(params), headers=headers
+            )
+            response.raise_for_status()
+            result = response.json()
 
-            timestamp = int(time.time())
-            params = {
-                "SourceText": sentence,
-                "Source": src_lang,
-                "Target": dest_lang,
-                "ProjectId": 0,
-            }
-
-            headers = {
-                "Content-Type": "application/json; charset=utf-8",
-                "Host": "tmt.tencentcloudapi.com",
-                "X-TC-Action": "TextTranslate",
-                "X-TC-Timestamp": str(timestamp),
-                "X-TC-Version": "2018-03-21",
-                "X-TC-Region": "ap-guangzhou",
-                "Authorization": self._generate_sign(params, timestamp),
-            }
-
-            try:
-                response = requests.post(
-                    self.api_url, data=json.dumps(params), headers=headers
-                )
-                response.raise_for_status()
-                result = response.json()
-
-                if "Response" in result and "TargetText" in result["Response"]:
-                    translated_sentences.append(result["Response"]["TargetText"])
-                elif "Response" in result and "Error" in result["Response"]:
-                    error = result["Response"]["Error"]
-                    print(
-                        f"Tencent API Error: {error.get('Code')} - {error.get('Message', 'Unknown error')}"
-                    )
-                    translated_sentences.append(
-                        sentence
-                    )  # Return original sentence on error
-                else:
-                    print(f"Tencent API Error: Unexpected response format: {result}")
-                    translated_sentences.append(sentence)
-
-            except requests.exceptions.RequestException as e:
-                print(f"Translation error (Tencent HTTP): {e}")
-                translated_sentences.append(sentence)
-            except json.JSONDecodeError as e:
+            if "Response" in result and "TargetText" in result["Response"]:
+                return result["Response"]["TargetText"]
+            elif "Response" in result and "Error" in result["Response"]:
+                error = result["Response"]["Error"]
                 print(
-                    f"Translation error (Tencent JSON Decode): {e} - Response: {response.text}"
+                    f"Tencent API Error: {error.get('Code')} - {error.get('Message', 'Unknown error')}"
                 )
-                translated_sentences.append(sentence)
-            except Exception as e:
-                print(f"Translation error (Tencent): {e}")
-                translated_sentences.append(sentence)
+            else:
+                print(f"Tencent API Error: Unexpected response format: {result}")
 
-        return translated_sentences
+        except requests.exceptions.RequestException as e:
+            print(f"Translation error (Tencent HTTP): {e}")
+        except json.JSONDecodeError as e:
+            print(
+                f"Translation error (Tencent JSON Decode): {e} - Response: {response.text}"
+            )
+        except Exception as e:
+            print(f"Translation error (Tencent): {e}")
+
+        return sentence  # Return original sentence on error
 
     def get_lang_map(self) -> Dict[str, str]:
         return self.TENCENT_LANG_MAP

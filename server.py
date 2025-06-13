@@ -12,6 +12,8 @@ import re
 from symspellpy import SymSpell, Verbosity
 import argparse
 import helpers
+import sqlite3
+import hashlib
 from tnx_translator import Translator, get_translator
 
 # https://en.wikipedia.org/wiki/ISO_639-3
@@ -31,7 +33,7 @@ OCR_LANG_MAP = {
 
 SAVE_DIR = "./data"
 DEFAULT_CONFIG = {
-    "version": "4.0.0",
+    "version": "5.0.0",
     "image_processing": {
         "contrast": 1.0,
         "brightness": 1.0,
@@ -47,6 +49,10 @@ DEFAULT_CONFIG = {
         "translation_frame": {"startX": 0, "startY": 0, "endX": 0, "endY": 0},
         "output_frame": {"startX": 0, "startY": 0, "endX": 0, "endY": 0},
     },
+    "translation_cache": {
+        "cache_translation": True,
+        "use_cache": True,
+    },
 }
 
 app = Flask(__name__)
@@ -55,6 +61,7 @@ if not os.path.exists(SAVE_DIR):
 
 global_pid = None
 sym_spell = None
+translator_type = None
 translator: Translator = None
 
 
@@ -78,7 +85,55 @@ def get_pid_dir(pid):
 
 
 def get_config_path():
+    global global_pid
     return os.path.join(get_pid_dir(global_pid), "config.json")
+
+
+def get_db_path(lang_from, lang_to, translator_type):
+    global global_pid
+    return os.path.join(
+        get_pid_dir(global_pid), f"{lang_from}_{lang_to}_{translator_type}.db"
+    )
+
+
+def init_db(db_path):
+    if not os.path.exists(db_path):
+        sqlite3.connect(db_path).execute(
+            """
+        CREATE TABLE IF NOT EXISTS translations (
+            original_hash TEXT PRIMARY KEY,
+            original_text TEXT UNIQUE,
+            translated_text TEXT
+        )
+        """
+        )
+
+
+def store_cache_translation(original, translated, db_path):
+    with sqlite3.connect(db_path) as conn:
+        text_hash = hashlib.sha256(original.encode()).hexdigest()
+
+        conn.execute(
+            """
+        INSERT OR IGNORE INTO translations 
+        (original_hash, original_text, translated_text)
+        VALUES (?, ?, ?)
+        """,
+            (text_hash, original, translated),
+        )
+
+        conn.commit()
+
+
+def get_cached_translation(db_path, original):
+    text_hash = hashlib.sha256(original.encode()).hexdigest()
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.execute(
+            "SELECT translated_text FROM translations WHERE original_hash = ?",
+            (text_hash,),
+        )
+        result = cursor.fetchone()
+        return result[0] if result else None
 
 
 def load_config():
@@ -198,13 +253,19 @@ def run_ocr(image: Image.Image, config):
 @app.route("/")
 def index_pid():
     global global_pid
-    origin_exists = os.path.exists(os.path.join(SAVE_DIR, f"{global_pid}_origin.png"))
+    if not global_pid:
+        return (
+            "First, you need to make a request from the switch to get the current PID"
+        )
+    original_exists = os.path.exists(
+        os.path.join(get_pid_dir(global_pid), "original.png")
+    )
     timestamp = str(time.time())
     config = load_config()
     return render_template(
         "index.html",
         config=config,
-        origin_exists=origin_exists,
+        original_exists=original_exists,
         timestamp=timestamp,
         pid=global_pid,
     )
@@ -223,6 +284,8 @@ def save_config_pid(pid):
             config["image_processing"].update(new_config_data["image_processing"])
         if "text_processing" in new_config_data:
             config["text_processing"].update(new_config_data["text_processing"])
+        if "translation_cache" in new_config_data:
+            config["translation_cache"].update(new_config_data["translation_cache"])
 
         # Handle translation update
         if "translation" in new_config_data:
@@ -238,11 +301,12 @@ def save_config_pid(pid):
 
 
 def process_current_image():
-    origin_path = os.path.join(get_pid_dir(global_pid), "original.png")
-    if not os.path.exists(origin_path):
+    global global_pid
+    original_path = os.path.join(get_pid_dir(global_pid), "original.png")
+    if not os.path.exists(original_path):
         return False
     config = load_config()
-    image = Image.open(origin_path)
+    image = Image.open(original_path)
     processed_image = apply_image_processing(image, config["image_processing"])
     processed_image.save(os.path.join(get_pid_dir(global_pid), "processed.png"))
     return True
@@ -257,14 +321,15 @@ def process_image_pid(pid):
     return jsonify(
         {
             "original": f"/image/{pid}/original?"
-            + str(os.path.getmtime(os.path.join(SAVE_DIR, f"{pid}_origin.png"))),
+            + os.path.join(get_pid_dir(global_pid), "original.png"),
             "processed": f"/image/{pid}/processed?"
-            + str(os.path.getmtime(os.path.join(SAVE_DIR, f"{pid}_processed.png"))),
+            + os.path.join(get_pid_dir(global_pid), "processed.png"),
         }
     )
 
 
 def process_ocr_and_translation(image: Image.Image, config):
+    global translator_type
     extracted_text, error = run_ocr(image, config)
     if error:
         return None, None, error
@@ -272,22 +337,40 @@ def process_ocr_and_translation(image: Image.Image, config):
     sentences = [extracted_text]
     if config["text_processing"]["split_sentences"]:
         sentences = helpers.split_into_sentences(extracted_text)
-    src_lang = translator.convert_lang_code(
-        config["translation"]["src_lang"], LANGUAGE_CODES
-    )
-    dest_lang = translator.convert_lang_code(
-        config["translation"]["dest_lang"], LANGUAGE_CODES
-    )
-    translated_text = " ".join(translator.translate(sentences, src_lang, dest_lang))
+    iso_src_lang = config["translation"]["src_lang"]
+    src_lang = translator.convert_lang_code(iso_src_lang, LANGUAGE_CODES)
+    iso_dest_lang = config["translation"]["dest_lang"]
+    dest_lang = translator.convert_lang_code(iso_dest_lang, LANGUAGE_CODES)
+    translated_text = []
+    cache_translation = config["translation_cache"]["cache_translation"]
+    use_cache = config["translation_cache"]["use_cache"]
+    db_path = get_db_path(iso_src_lang, iso_dest_lang, translator_type)
+    if cache_translation or use_cache:
+        init_db(db_path)
+    for sentence in sentences:
+        text = sentence.strip()
+        result = None
+        if text:
+            if use_cache:
+                result = get_cached_translation(db_path, text)
+            if not result:
+                result = translator.translate(text, src_lang, dest_lang)
+                if cache_translation:
+                    if not (result == text):
+                        store_cache_translation(text, result, db_path)
+                print(f"New translation: `{text}` -> `{result}`")
+            else:
+                print(f"Result from cache: `{text}` -> `{result}`")
+            translated_text.append(result)
 
-    return extracted_text, translated_text, None
+    return extracted_text, " ".join(translated_text), None
 
 
 @app.route("/recognize_text/<pid>", methods=["POST"])
 def recognize_text_pid(pid):
     global global_pid
     global_pid = pid
-    processed_path = os.path.join(SAVE_DIR, f"{pid}_processed.png")
+    processed_path = os.path.join(get_pid_dir(global_pid), "processed.png")
     if not os.path.exists(processed_path):
         return jsonify({"error": "No processed image found"}), 400
 
@@ -453,5 +536,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    translator = get_translator(args.translator)
+    translator_type = args.translator
+    translator = get_translator(translator_type)
     app.run(host="0.0.0.0", port=1785)
