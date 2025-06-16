@@ -193,16 +193,16 @@
         <div class="images">
             <div class="image-container">
                 <h3>Original Image</h3>
-                {% if origin_exists %}
-                <img id="original-img" src="/image/{{ pid }}/original?{{ timestamp }}" alt="Original">
+                {% if original_exists %}
+                <img id="original-img" src="/image/{{ pid }}/original" alt="Original">
                 {% else %}
                 <div class="no-image">No image uploaded yet (will appear after first translation)</div>
                 {% endif %}
             </div>
             <div class="image-container">
                 <h3>Processed Image</h3>
-                {% if origin_exists %}
-                <img id="processed-img" src="/image/{{ pid }}/processed?{{ timestamp }}" alt="Processed">
+                {% if original_exists %}
+                <img id="processed-img" src="/image/{{ pid }}/processed" alt="Processed">
                 {% else %}
                 <div class="no-image">Processed image will appear here</div>
                 {% endif %}
@@ -329,6 +329,22 @@
                     Split Text into Sentences for Translation
                 </label>
             </div>
+
+            <div class="control-group">
+                <h3>Translation Cache</h3>
+
+                <label>
+                    <input type="checkbox" id="cache-translation" {% if config.translation_cache.cache_translation
+                        %}checked{% endif %}>
+                    Cache Translations (store translations for reuse)
+                </label>
+
+                <label>
+                    <input type="checkbox" id="use-cache" {% if config.translation_cache.use_cache %}checked{% endif %}>
+                    Use Cached Translations
+                </label>
+            </div>
+
 
             <button id="save-btn">Save Settings</button>
             <button id="reset-btn">Reset to Defaults</button>
@@ -477,6 +493,10 @@
                 text_processing: {
                     enable_symspellpy: document.getElementById('enable-symspellpy').checked,
                     split_sentences: document.getElementById('split-sentences').checked
+                },
+                translation_cache: {
+                    cache_translation: document.getElementById('cache-translation').checked,
+                    use_cache: document.getElementById('use-cache').checked
                 }
             };
 
@@ -529,6 +549,10 @@
                 // Text Processing
                 document.getElementById('enable-symspellpy').checked = false;
                 document.getElementById('split-sentences').checked = true;
+
+                // Translation Cache
+                document.getElementById('cache-translation').checked = true;
+                document.getElementById('use-cache').checked = true;
 
                 document.getElementById('save-btn').click();
             }

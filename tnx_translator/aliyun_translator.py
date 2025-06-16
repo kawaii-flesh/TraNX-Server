@@ -33,18 +33,16 @@ class AliyunTranslator(Translator):
         "ukr": "ru",  # Aliyun doesn't support Ukrainian, fallback to Russian
     }
 
-    def translate(
-        self, sentences: List[str], src_lang: str, dest_lang: str
-    ) -> List[str]:
-        """Translate a list of sentences from source language to target language
+    def translate(self, sentence: str, src_lang: str, dest_lang: str) -> str:
+        """Translate a sentence from source language to target language
 
         Args:
-            sentences (List[str]): List of sentences to translate
+            sentence (str): Sentence to translate
             src_lang (str): Source language code
             dest_lang (str): Target language code
 
         Returns:
-            List[str]: List of translated sentences
+            str: Translated sentence
 
         Raises:
             ValueError: If language code is not supported
@@ -53,50 +51,49 @@ class AliyunTranslator(Translator):
         try:
             # Prepare request
             runtime = RuntimeOptions()
-            translated = []
 
-            # Translate each sentence
-            for text in sentences:
-                request = TranslateGeneralRequest(
-                    source_language=src_lang,
-                    target_language=dest_lang,
-                    source_text=text,
-                    format_type="text",
-                    scene="general",
-                )
+            # Translate sentence
+            request = TranslateGeneralRequest(
+                source_language=src_lang,
+                target_language=dest_lang,
+                source_text=sentence,
+                format_type="text",
+                scene="general",
+            )
 
-                # Call API
-                response = self.client.translate_general_with_options(request, runtime)
+            # Call API
+            response = self.client.translate_general_with_options(request, runtime)
 
-                # Handle both possible response structures
-                try:
-                    if hasattr(response.body, "code"):
-                        code = response.body.code
-                        message = response.body.message
-                        translated_text = response.body.data.translated
-                    else:
-                        code = response.body.Code
-                        message = response.body.Message
-                        translated_text = response.body.Data.Translated
+            # Handle both possible response structures
+            try:
+                translated = ""
+                if hasattr(response.body, "code"):
+                    code = response.body.code
+                    message = response.body.message
+                    translated = response.body.data.translated
+                else:
+                    code = response.body.Code
+                    message = response.body.Message
+                    translated = response.body.Data.Translated
 
-                    if code != "200":
-                        raise Exception(
-                            f"Translation failed with code {code}: {message}\nFull response: {response}"
-                        )
-
-                    translated.append(translated_text)
-
-                except AttributeError as e:
+                if code != "200":
                     raise Exception(
-                        f"Unexpected response structure: {str(e)}\nFull response: {response}"
+                        f"Translation failed with code {code}: {message}\nFull response: {response}"
                     )
+                
+                return translated
 
-            return translated
+            except AttributeError as e:
+                raise Exception(
+                    f"Unexpected response structure: {str(e)}\nFull response: {response}"
+                )
 
         except ValueError as e:
             raise ValueError(f"Language code error: {str(e)}")
         except Exception as e:
             raise Exception(f"Translation error: {str(e)}")
+
+        return sentence  # Return original sentence on error
 
     def get_lang_map(self) -> Dict[str, str]:
         """Get the language code mapping
