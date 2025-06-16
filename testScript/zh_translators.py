@@ -1,3 +1,7 @@
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tnx_translator.baidu_translator import BaiduTranslator
 from tnx_translator.tencent_translator import TencentTranslator
 from tnx_translator.aliyun_translator import AliyunTranslator
@@ -41,10 +45,10 @@ def test_baidu():
     print("\ntranslating...")
     try:
         translated_sentences = translator.translate(
-            [sentence_to_translate], source_lang, destination_lang
+            sentence_to_translate, source_lang, destination_lang
         )
         if translated_sentences:
-            print(f"result: {translated_sentences[0]}")
+            print(f"result: {translated_sentences}")
         else:
             print("translation failed.")
     except Exception as e:
@@ -88,10 +92,10 @@ def test_tencent():
     print("\ntranslating...")
     try:
         translated_sentences = translator.translate(
-            [sentence_to_translate], source_lang, destination_lang
+            sentence_to_translate, source_lang, destination_lang
         )
         if translated_sentences:
-            print(f"result: {translated_sentences[0]}")
+            print(f"result: {translated_sentences}")
         else:
             print("translation failed.")
     except Exception as e:
@@ -137,10 +141,10 @@ def test_aliyun():
     print("\ntranslating...")
     try:
         translated_sentences = translator.translate(
-            [sentence_to_translate], source_lang, destination_lang
+            sentence_to_translate, source_lang, destination_lang
         )
         if translated_sentences:
-            print(f"result: {translated_sentences[0]}")
+            print(f"result: {translated_sentences}")
         else:
             print("translation failed.")
     except Exception as e:
@@ -184,10 +188,10 @@ def test_youdao():
     print("\ntranslating...")
     try:
         translated_sentences = translator.translate(
-            [sentence_to_translate], source_lang, destination_lang
+            sentence_to_translate, source_lang, destination_lang
         )
         if translated_sentences:
-            print(f"result: {translated_sentences[0]}")
+            print(f"result: {translated_sentences}")
         else:
             print("translation failed.")
     except Exception as e:
