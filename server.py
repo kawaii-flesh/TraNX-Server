@@ -14,6 +14,8 @@ import argparse
 import helpers
 import sqlite3
 import hashlib
+import threading
+import socket
 from tnx_translator import Translator, get_translator
 
 # https://en.wikipedia.org/wiki/ISO_639-3
@@ -33,7 +35,7 @@ OCR_LANG_MAP = {
 
 SAVE_DIR = "./data"
 DEFAULT_CONFIG = {
-    "version": "5.0.0",
+    "version": "5.1.0",
     "image_processing": {
         "contrast": 1.0,
         "brightness": 1.0,
@@ -54,6 +56,9 @@ DEFAULT_CONFIG = {
         "use_cache": True,
     },
 }
+
+TRANX_PORT = 1785
+BROADCAST_PORT = 1786
 
 app = Flask(__name__)
 if not os.path.exists(SAVE_DIR):
@@ -498,25 +503,28 @@ def upload_screenshot():
 
         frame_width = render_end_x - render_x
         frame_height = render_end_y - render_y
-        font_height = frame_height
+        font_size = frame_height
         aspect_ratio = helpers.get_aspect_ratio(translated_text)
 
         while True:
-            char_width = font_height * aspect_ratio
+            if font_size < 8:
+                break
+            char_width = font_size * aspect_ratio
             max_chars_per_line = int(frame_width / char_width)
             wrapped_text = helpers.wrap_text(translated_text, max_chars_per_line)
             lines_count = len(wrapped_text.split("\n"))
-            total_height = lines_count * font_height
-            if total_height <= frame_height and font_height > 1:
+            max_line_size = max(len(line) for line in wrapped_text.split("\n"))
+            total_height = lines_count * font_size
+            if total_height < frame_height and max_line_size * char_width < frame_width:
                 break
-            font_height -= 1
+            font_size -= 1
 
         response = {
             "text": wrapped_text,
             "x": render_x,
             "y": render_y,
             "width": frame_width,
-            "height": font_height,
+            "height": font_size,
             "translation_frame": translation_frame,
             "output_frame": output_frame,
             "use_output_frame": use_output_frame,
@@ -524,7 +532,32 @@ def upload_screenshot():
 
         return jsonify(response)
     except Exception as e:
+        import traceback
+
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
+
+def run_discovery_server():
+    global BROADCAST_PORT
+    discovery_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    discovery_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    discovery_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    discovery_sock.bind(("", BROADCAST_PORT))
+
+    print(f"Discovery server running on port {BROADCAST_PORT}")
+
+    while True:
+        try:
+            print("Waiting for broadcast messages...")
+            data, addr = discovery_sock.recvfrom(1024)
+            print(f"Received raw data: {data} from {addr}")
+            if data == b"DISCOVER_TRANX_SERVER":
+                response = f"TRANX_SERVER:{TRANX_PORT}"
+                discovery_sock.sendto(response.encode(), addr)
+                print(f"Responded to discovery request from {addr}")
+        except Exception as e:
+            print(f"Discovery error: {e}")
 
 
 if __name__ == "__main__":
@@ -538,4 +571,8 @@ if __name__ == "__main__":
 
     translator_type = args.translator
     translator = get_translator(translator_type)
-    app.run(host="0.0.0.0", port=1785)
+
+    discovery_thread = threading.Thread(target=run_discovery_server, daemon=True)
+    discovery_thread.start()
+
+    app.run(host="0.0.0.0", port=TRANX_PORT)
