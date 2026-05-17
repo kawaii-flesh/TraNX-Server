@@ -294,6 +294,8 @@
                         Chinese</option>
                     <option value="ukr" {% if config.translation.src_lang=='ukr' %}selected{% endif %}>Ukrainian
                     </option>
+                    <option value="ind" {% if config.translation.src_lang=='ind' %}selected{% endif %}>Indonesian
+                    </option>
                 </select>
 
                 <label for="dest-lang">Target Language</label>
@@ -310,6 +312,8 @@
                     <option value="zht" {% if config.translation.dest_lang=='zht' %}selected{% endif %}>Traditional
                         Chinese</option>
                     <option value="ukr" {% if config.translation.dest_lang=='ukr' %}selected{% endif %}>Ukrainian
+                    </option>
+                    <option value="ind" {% if config.translation.dest_lang=='ind' %}selected{% endif %}>Indonesian
                     </option>
                 </select>
             </div>

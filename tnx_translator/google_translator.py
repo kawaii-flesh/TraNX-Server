@@ -15,6 +15,7 @@ class GoogleWebTranslator(Translator):
         "zho": "zh-cn",
         "ukr": "uk",
         "zht": "zh-tw",
+        "ind": "id",
     }
 
     def __init__(self):

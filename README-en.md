@@ -8,6 +8,10 @@ TraNX-Server - OCR + translation for the screen translator [TraNX](https://githu
 
 ## Installation and Startup
 
+### Using a Custom Font
+
+By default, the text is rendered using a system font (if one is successfully found and loaded). If the characters of the translation language are displayed incorrectly, place a TrueType (.ttf) font file that supports the required characters into the server directory and name it `font.ttf`
+
 ### Windows + Google Translate
 
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)

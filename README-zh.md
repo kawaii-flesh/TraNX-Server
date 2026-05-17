@@ -8,6 +8,10 @@ English Introduction: [README-en.md](README-en.md)
 
 ## 安装与启动
 
+### 使用自定义字体
+
+默认情况下，系统会使用系统字体来渲染文本（如果成功找到并加载）。如果翻译语言的字符显示不正确，请将支持所需字符的 TrueType (.ttf) 格式字体放入服务器目录，并命名为 `font.ttf`
+
 ### Windows + 谷歌翻译
 
 - [Python](https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe)

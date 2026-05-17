@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template, send_from_directory
 import base64
 from io import BytesIO
-from PIL import Image, ImageEnhance, ImageFilter
+from PIL import Image, ImageEnhance, ImageFilter, ImageDraw, ImageFont
 import cv2
 import numpy as np
 import os
@@ -19,7 +19,7 @@ import socket
 from tnx_translator import Translator, get_translator
 
 # https://en.wikipedia.org/wiki/ISO_639-3
-LANGUAGE_CODES = ["eng", "rus", "ukr", "deu", "fra", "jpn", "kor", "zho", "zht"]
+LANGUAGE_CODES = ["eng", "rus", "ukr", "deu", "fra", "jpn", "kor", "zho", "zht", "ind"]
 # https://github.com/PaddlePaddle/PaddleOCR/blob/fd5b4e1049b758cf29b3c922a19b4c5f4ec47b88/docs/version2.x/ppocr/blog/multi_languages.en.md
 OCR_LANG_MAP = {
     "eng": "en",
@@ -31,11 +31,61 @@ OCR_LANG_MAP = {
     "kor": "korean",
     "zho": "ch",
     "zht": "chinese_cht",
+    "ind": "id",
 }
 
 SAVE_DIR = "./data"
+FONT_PATH = "font.ttf"
+FONT_COLOR = (255, 255, 255, 255)
+FONT_MIN_SIZE = 14
+FONT_MAX_SIZE = 60
+
+RESOLVED_FONT_PATH = None
+
+
+def resolve_font_path():
+    if os.path.exists(FONT_PATH):
+        try:
+            ImageFont.truetype(FONT_PATH, FONT_MIN_SIZE)
+            print(f">>> Font found: {FONT_PATH}")
+            return FONT_PATH
+        except Exception:
+            pass
+
+    system_fonts = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/TTF/DejaVuSans.ttf",
+        "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+        "arial.ttf",
+        "Arial.ttf",
+        "/System/Library/Fonts/Helvetica.ttc",
+    ]
+    for sys_font in system_fonts:
+        try:
+            ImageFont.truetype(sys_font, FONT_MIN_SIZE)
+            print(f">>> Font found: {sys_font}")
+            return sys_font
+        except OSError:
+            continue
+
+    print(
+        ">>> Warning: No TTF font found. Using default bitmap font (scaling may be limited)."
+    )
+    return None
+
+
+def get_font_by_size(size):
+    if RESOLVED_FONT_PATH:
+        return ImageFont.truetype(RESOLVED_FONT_PATH, size)
+
+    try:
+        return ImageFont.load_default(size=size)
+    except TypeError:
+        return ImageFont.load_default()
+
+
 DEFAULT_CONFIG = {
-    "version": "5.1.0",
+    "version": "6.0.0",
     "image_processing": {
         "contrast": 1.0,
         "brightness": 1.0,
@@ -255,6 +305,73 @@ def run_ocr(image: Image.Image, config):
     return text, None
 
 
+def render_text_image(text, frame_width, frame_height):
+    if frame_width <= 0 or frame_height <= 0 or not text or not text.strip():
+        return "", 0, 0
+
+    font_size = min(frame_height, FONT_MAX_SIZE)
+    best_font = None
+    best_lines = []
+    best_max_line_width = 0
+
+    while font_size >= FONT_MIN_SIZE:
+        font = get_font_by_size(font_size)
+        line_height = font_size
+        ascent, descent = font.getmetrics()
+
+        lines = []
+        for para in text.split("\n"):
+            if not para:
+                continue
+            words = para.split()
+            current_line = ""
+            for word in words:
+                test_line = f"{current_line} {word}".strip()
+                if font.getlength(test_line) <= frame_width:
+                    current_line = test_line
+                else:
+                    if current_line:
+                        lines.append(current_line)
+                    current_line = word
+            if current_line:
+                lines.append(current_line)
+
+        total_height = len(lines) * line_height + descent
+        max_line_width = max((font.getlength(line) for line in lines), default=0)
+
+        if total_height <= frame_height and max_line_width <= frame_width:
+            best_font = font
+            best_lines = lines
+            best_max_line_width = max_line_width
+            break
+
+        font_size -= 1
+
+    if best_font is None:
+        best_font = font
+        best_lines = lines
+        best_max_line_width = max_line_width
+
+    line_height = best_font.size
+    ascent, descent = best_font.getmetrics()
+
+    actual_w = int(best_max_line_width) + 4
+    actual_h = len(best_lines) * line_height + descent + 4
+
+    img = Image.new("RGBA", (actual_w, actual_h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    y_offset = 0
+    for line in best_lines:
+        draw.text((0, y_offset), line, font=best_font, fill=FONT_COLOR)
+        y_offset += line_height
+
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+
+    return base64.b64encode(buffer.getvalue()).decode("utf-8"), actual_w, actual_h
+
+
 @app.route("/")
 def index_pid():
     global global_pid
@@ -432,7 +549,6 @@ def upload_screenshot():
         output_frame_req = json.loads(request.form.get("outputFrame", "{}"))
 
         request_has_translation_frame = check_frame(translation_frame_req)
-
         request_has_output_frame = check_frame(output_frame_req)
 
         config_changed = False
@@ -451,11 +567,9 @@ def upload_screenshot():
         if not (check_frame(translation_frame)):
             return jsonify(
                 {
-                    "text": "At least the translation frame must be specified!",
+                    "image_base64": "",
                     "x": 10,
                     "y": 0,
-                    "width": 0,
-                    "height": 24,
                     "translation_frame": {
                         "startX": 0,
                         "startY": 0,
@@ -503,28 +617,18 @@ def upload_screenshot():
 
         frame_width = render_end_x - render_x
         frame_height = render_end_y - render_y
-        font_size = frame_height
-        aspect_ratio = helpers.get_aspect_ratio(translated_text)
 
-        while True:
-            if font_size < 8:
-                break
-            char_width = font_size * aspect_ratio
-            max_chars_per_line = int(frame_width / char_width)
-            wrapped_text = helpers.wrap_text(translated_text, max_chars_per_line)
-            lines_count = len(wrapped_text.split("\n"))
-            max_line_size = max(len(line) for line in wrapped_text.split("\n"))
-            total_height = lines_count * font_size
-            if total_height < frame_height and max_line_size * char_width < frame_width:
-                break
-            font_size -= 1
+        rendered_b64, img_w, img_h = render_text_image(
+            translated_text, frame_width, frame_height
+        )
+
+        final_x = render_x + (frame_width - img_w) // 2
+        final_y = render_y + (frame_height - img_h) // 2
 
         response = {
-            "text": wrapped_text,
-            "x": render_x,
-            "y": render_y,
-            "width": frame_width,
-            "height": font_size,
+            "image_base64": rendered_b64,
+            "x": final_x,
+            "y": final_y,
             "translation_frame": translation_frame,
             "output_frame": output_frame,
             "use_output_frame": use_output_frame,
@@ -568,6 +672,8 @@ if __name__ == "__main__":
         choices=["nllb", "google", "baidu", "aliyun", "tencent", "youdao"],
     )
     args = parser.parse_args()
+
+    RESOLVED_FONT_PATH = resolve_font_path()
 
     translator_type = args.translator
     translator = get_translator(translator_type)
