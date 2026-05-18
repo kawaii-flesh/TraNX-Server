@@ -18,8 +18,22 @@ import threading
 import socket
 from tnx_translator import Translator, get_translator
 
+RTL_LANGS = {"ara", "arb", "per", "urd", "heb"}
+
 # https://en.wikipedia.org/wiki/ISO_639-3
-LANGUAGE_CODES = ["eng", "rus", "ukr", "deu", "fra", "jpn", "kor", "zho", "zht", "ind"]
+LANGUAGE_CODES = [
+    "eng",
+    "rus",
+    "ukr",
+    "deu",
+    "fra",
+    "jpn",
+    "kor",
+    "zho",
+    "zht",
+    "ind",
+    "ara",
+]
 # https://github.com/PaddlePaddle/PaddleOCR/blob/fd5b4e1049b758cf29b3c922a19b4c5f4ec47b88/docs/version2.x/ppocr/blog/multi_languages.en.md
 OCR_LANG_MAP = {
     "eng": "en",
@@ -32,6 +46,7 @@ OCR_LANG_MAP = {
     "zho": "ch",
     "zht": "chinese_cht",
     "ind": "id",
+    "ara": "ar",
 }
 
 SAVE_DIR = "./data"
@@ -85,7 +100,7 @@ def get_font_by_size(size):
 
 
 DEFAULT_CONFIG = {
-    "version": "6.0.0",
+    "version": "6.1.0",
     "image_processing": {
         "contrast": 1.0,
         "brightness": 1.0,
@@ -305,7 +320,7 @@ def run_ocr(image: Image.Image, config):
     return text, None
 
 
-def render_text_image(text, frame_width, frame_height):
+def render_text_image(text, frame_width, frame_height, lang="eng"):
     if frame_width <= 0 or frame_height <= 0 or not text or not text.strip():
         return "", 0, 0
 
@@ -362,8 +377,13 @@ def render_text_image(text, frame_width, frame_height):
     draw = ImageDraw.Draw(img)
 
     y_offset = 0
+    is_rtl = lang in RTL_LANGS
     for line in best_lines:
-        draw.text((0, y_offset), line, font=best_font, fill=FONT_COLOR)
+        x = 0
+        if is_rtl:
+            x = actual_w - int(best_font.getlength(line)) - 2
+
+        draw.text((x, y_offset), line, font=best_font, fill=FONT_COLOR)
         y_offset += line_height
 
     buffer = BytesIO()
@@ -619,7 +639,10 @@ def upload_screenshot():
         frame_height = render_end_y - render_y
 
         rendered_b64, img_w, img_h = render_text_image(
-            translated_text, frame_width, frame_height
+            translated_text,
+            frame_width,
+            frame_height,
+            lang=config["translation"]["dest_lang"],
         )
 
         final_x = render_x + (frame_width - img_w) // 2
